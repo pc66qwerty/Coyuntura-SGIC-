@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /mnt/c/xampp/htdocs/MonitorVial -type f | sort 2>/dev/null || true)",
+      "Read(//mnt/c/xampp/htdocs/**)",
+      "Bash(Get-ChildItem -Path \"c:\\\\xampp\\\\htdocs\\\\MonitorVial\\\\frontend\\\\src\" -Recurse -Include \"*auth*\",\"*login*\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object FullName)"
+    ]
+  }
+}

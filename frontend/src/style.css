@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg:         #F5F7FA;
+    --surface:    #FFFFFF;
+    --border:     #DDE3ED;
+    --border-hi:  #B8C7D9;
+    --accent:     #1E3A5F;
+    --accent-hi:  #254880;
+    --accent-dim: rgba(30,58,95,.07);
+    --t1:         #0F1923;
+    --t2:         #6B7A8D;
+    --t3:         #C2CDD9;
+    --danger:     #DC2626;
+    --success:    #16A34A;
+    --warning:    #D97706;
+  }
+
+  html.dark {
+    --bg:         #080B10;
+    --surface:    #0D1117;
+    --border:     #1A2332;
+    --border-hi:  #263245;
+    --accent:     #4A90D9;
+    --accent-hi:  #5AA0E8;
+    --accent-dim: rgba(74,144,217,.12);
+    --t1:         #E2E8F0;
+    --t2:         #64748B;
+    --t3:         #2A3A50;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--t1);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  input, select, textarea, button { font-family: inherit; }
+}
+
+@layer utilities {
+  .font-display { font-family: 'Barlow Condensed', sans-serif; }
+  .font-mono    { font-family: 'JetBrains Mono', monospace; }
+}
+
+/* map */
+.leaflet-container { background: var(--bg); }
+
+/* map marker pulse */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+.marker-pulse::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.3;
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
