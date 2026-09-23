@@ -55,7 +55,7 @@ const tipoStats = computed(() => {
 const topDeptos = computed(() => {
   const stats = {}
   bloqueos.value.filter((b) => b.estado === 'Activo').forEach((b) => { stats[b.departamento] = (stats[b.departamento] || 0) + 1 })
-  return Object.entries(stats).map(([nombre, count]) => ({ nombre, count })).sort((a, b) => b.count - a.count).slice(0, 5)
+  return Object.entries(stats).map(([nombre, count]) => ({ nombre, count })).sort((a, b) => b.count - a.count)
 })
 const maxDepto = computed(() => Math.max(...topDeptos.value.map((d) => d.count), 1))
 
