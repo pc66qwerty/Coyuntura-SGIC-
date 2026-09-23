@@ -116,6 +116,95 @@
         @blur="$event.target.style.borderColor='var(--border)'" />
     </div>
 
+    <!-- Datos del evento (matriz institucional) -->
+    <div class="rounded-lg border" style="border-color:var(--border)">
+      <button type="button" @click="showDatosEvento = !showDatosEvento"
+        class="w-full flex items-center justify-between px-3 py-2.5 text-left"
+        style="color:var(--t2)">
+        <span class="font-mono text-xs uppercase tracking-wide">Datos del evento <span style="color:var(--t3)">(opcional)</span></span>
+        <svg class="w-4 h-4 transition-transform" :class="showDatosEvento ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      <div v-if="showDatosEvento" class="p-3 pt-0 space-y-3 border-t" style="border-color:var(--border)">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Fecha y hora de inicio</label>
+            <input v-model="form.fecha_hora_inicio" type="datetime-local"
+              class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+              style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+          </div>
+          <div>
+            <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Nivel de conflicto</label>
+            <select v-model="form.nivel_conflicto"
+              class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+              style="background:var(--bg);border-color:var(--border);color:var(--t1)">
+              <option value="">Por establecer</option>
+              <option value="Bajo">Bajo</option>
+              <option value="Medio">Medio</option>
+              <option value="Alto">Alto</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Zona</label>
+            <input v-model="form.zona_inicio" type="text" placeholder="Ej. 7"
+              class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+              style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+          </div>
+          <div>
+            <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Comisaría</label>
+            <input v-model="form.comisaria_inicio" type="text" placeholder="Ej. 14"
+              class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+              style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Referencia del punto</label>
+          <input v-model="form.referencia_inicio" type="text" placeholder="Punto de referencia del lugar"
+            class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+            style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Instrumentos utilizados</label>
+            <input v-model="form.instrumentos" type="text" placeholder="Pancartas, llantas, palos..."
+              class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+              style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+          </div>
+          <div>
+            <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Presencia policial</label>
+            <input v-model="form.presencia_policial" type="text" placeholder="Efectivos y unidades"
+              class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+              style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+          </div>
+          <div>
+            <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Cantidad de vehículos</label>
+            <input v-model="form.cantidad_vehiculos" type="text" placeholder="Ej. 6 vehículos"
+              class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+              style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+          </div>
+          <div>
+            <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Actores</label>
+            <input v-model="form.actores" type="text" placeholder="Ej. Civiles"
+              class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+              style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Demandas / motivo</label>
+          <input v-model="form.demandas" type="text" placeholder="Ej. Por alza en precios del combustible"
+            class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+            style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+        </div>
+        <div>
+          <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Líderes identificados / menores / tercera edad</label>
+          <input v-model="form.lideres_vulnerables" type="text" placeholder="Detalle si aplica"
+            class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+            style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+        </div>
+      </div>
+    </div>
+
     <!-- Observaciones -->
     <div>
       <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Observaciones</label>
@@ -127,26 +216,31 @@
         @blur="$event.target.style.borderColor='var(--border)'"></textarea>
     </div>
 
-    <!-- Foto -->
+    <!-- Fotos -->
     <div>
-      <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">Foto</label>
-      <div v-if="fotoPreview" class="relative mb-2">
-        <img :src="fotoPreview" class="w-full h-32 object-cover rounded-lg border" style="border-color:var(--border)" />
-        <button type="button" @click="removePhoto"
-          class="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center border"
-          style="background:var(--surface);border-color:var(--border);color:var(--t2)">
-          <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
+      <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">
+        Fotos <span style="color:var(--t3)">({{ fotoPreviews.length }}/{{ MAX_FOTOS }})</span>
+      </label>
+      <div v-if="fotoPreviews.length" class="grid grid-cols-4 gap-2 mb-2">
+        <div v-for="(src, i) in fotoPreviews" :key="src" class="relative">
+          <img :src="src" class="w-full h-16 object-cover rounded-lg border" style="border-color:var(--border)" />
+          <button type="button" @click="removePhoto(i)"
+            class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center border"
+            style="background:var(--surface);border-color:var(--border);color:var(--t2)">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
       </div>
-      <label class="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors border border-dashed"
+      <label v-if="fotoPreviews.length < MAX_FOTOS"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors border border-dashed"
         style="background:var(--bg);border-color:var(--border);color:var(--t3)"
         @mouseover="$event.currentTarget.style.borderColor='var(--accent)'"
         @mouseleave="$event.currentTarget.style.borderColor='var(--border)'">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
         </svg>
-        <span class="text-xs">{{ fotoFile ? fotoFile.name : 'Subir foto (máx. 5MB)' }}</span>
-        <input type="file" accept="image/*" class="hidden" @change="onPhoto" />
+        <span class="text-xs">Agregar fotos (máx. {{ MAX_FOTOS }}, 5MB c/u)</span>
+        <input type="file" accept="image/*" multiple class="hidden" @change="onPhoto" />
       </label>
     </div>
 
@@ -184,6 +278,20 @@ const departamentos = depList
 const prefijos = ['Km.', 'Zona', 'Ruta', 'Calle', 'Av.', 'Col.', 'Barrio', 'Aldea', 'Caserío']
 const dirHistory = JSON.parse(localStorage.getItem('mv_dir_history') || '[]')
 
+const DATOS_EVENTO_DEFAULT = {
+  fecha_hora_inicio: '',
+  nivel_conflicto: '',
+  zona_inicio: '',
+  comisaria_inicio: '',
+  referencia_inicio: '',
+  instrumentos: '',
+  presencia_policial: '',
+  cantidad_vehiculos: '',
+  actores: '',
+  demandas: '',
+  lideres_vulnerables: '',
+}
+
 const form = ref({
   tipo_evento: '',
   departamento: '',
@@ -193,12 +301,15 @@ const form = ref({
   longitud: '',
   manifestantes_aproximados: '',
   observaciones: '',
+  ...DATOS_EVENTO_DEFAULT,
 })
 const errors = ref({})
 const error = ref('')
 const loading = ref(false)
-const fotoFile = ref(null)
-const fotoPreview = ref(null)
+const showDatosEvento = ref(false)
+const MAX_FOTOS = 8
+const fotoFiles = ref([])
+const fotoPreviews = ref([])
 
 const municipios = computed(() => getMunicipios(form.value.departamento))
 
@@ -227,15 +338,19 @@ async function onMunicipioChange() {
 }
 
 function onPhoto(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  fotoFile.value = file
-  fotoPreview.value = URL.createObjectURL(file)
+  const files = Array.from(e.target.files || [])
+  const espacio = MAX_FOTOS - fotoFiles.value.length
+  files.slice(0, espacio).forEach((file) => {
+    fotoFiles.value.push(file)
+    fotoPreviews.value.push(URL.createObjectURL(file))
+  })
+  e.target.value = ''
 }
 
-function removePhoto() {
-  fotoFile.value = null
-  fotoPreview.value = null
+function removePhoto(i) {
+  URL.revokeObjectURL(fotoPreviews.value[i])
+  fotoFiles.value.splice(i, 1)
+  fotoPreviews.value.splice(i, 1)
 }
 
 watch(() => props.pendingCoords, (coords) => {
@@ -269,7 +384,10 @@ async function submit() {
     fd.append('longitud', form.value.longitud)
     if (form.value.manifestantes_aproximados) fd.append('manifestantes_aproximados', form.value.manifestantes_aproximados)
     if (form.value.observaciones) fd.append('observaciones', form.value.observaciones)
-    if (fotoFile.value) fd.append('foto', fotoFile.value)
+    Object.keys(DATOS_EVENTO_DEFAULT).forEach((key) => {
+      if (form.value[key]) fd.append(key, form.value[key])
+    })
+    fotoFiles.value.forEach((file) => fd.append('fotos', file))
 
     const { data } = await api.post('/api/bloqueos', fd)
 
@@ -278,9 +396,11 @@ async function submit() {
       localStorage.setItem('mv_dir_history', JSON.stringify(dirHistory.slice(0, 20)))
     }
 
-    form.value = { tipo_evento: '', departamento: '', municipio: '', direccion: '', latitud: '', longitud: '', manifestantes_aproximados: '', observaciones: '' }
-    fotoFile.value = null
-    fotoPreview.value = null
+    form.value = { tipo_evento: '', departamento: '', municipio: '', direccion: '', latitud: '', longitud: '', manifestantes_aproximados: '', observaciones: '', ...DATOS_EVENTO_DEFAULT }
+    showDatosEvento.value = false
+    fotoPreviews.value.forEach((src) => URL.revokeObjectURL(src))
+    fotoFiles.value = []
+    fotoPreviews.value = []
     emit('created', data)
   } catch (e) {
     error.value = e.response?.data?.detail || 'Error al registrar el evento'

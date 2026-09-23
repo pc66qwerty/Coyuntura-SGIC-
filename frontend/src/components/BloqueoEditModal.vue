@@ -16,7 +16,7 @@
         <!-- Estado toggle -->
         <div class="flex items-center justify-between rounded-lg px-4 py-3 border" style="background:var(--bg);border-color:var(--border)">
           <span class="text-sm font-medium" style="color:var(--t1)">Estado del evento</span>
-          <button type="button" @click="form.estado = form.estado === 'Activo' ? 'Finalizado' : 'Activo'"
+          <button type="button" @click="form.estado = form.estado === 'Activo' ? 'Inactivo' : 'Activo'"
             class="px-3 py-1 rounded-full text-xs font-medium transition-colors border"
             :style="form.estado === 'Activo'
               ? 'background:#FEF2F2;color:#DC2626;border-color:#FECACA'
@@ -94,6 +94,17 @@
               @blur="$event.target.style.borderColor='var(--border)'" />
           </div>
         </div>
+        <button type="button" @click="$emit('toggle-pick-mode')"
+          class="flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg border transition-colors font-medium -mt-1"
+          :style="pickMode
+            ? 'background:var(--accent);border-color:var(--accent);color:#fff'
+            : 'background:var(--bg);border-color:var(--border);color:var(--t2)'">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+          </svg>
+          {{ pickMode ? 'Cierra este panel y haz clic en el mapa...' : 'Seleccionar en mapa' }}
+        </button>
 
         <!-- Personas -->
         <div>
@@ -103,6 +114,178 @@
             style="background:var(--bg);border-color:var(--border);color:var(--t1)"
             @focus="$event.target.style.borderColor='var(--accent)'"
             @blur="$event.target.style.borderColor='var(--border)'" />
+        </div>
+
+        <!-- Datos del evento (matriz institucional) -->
+        <div class="rounded-lg border" style="border-color:var(--border)">
+          <button type="button" @click="showDatosEvento = !showDatosEvento"
+            class="w-full flex items-center justify-between px-3 py-2.5 text-left" style="color:var(--t2)">
+            <span class="font-mono text-xs uppercase tracking-wide">Datos del evento <span style="color:var(--t3)">(opcional)</span></span>
+            <svg class="w-4 h-4 transition-transform" :class="showDatosEvento ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div v-if="showDatosEvento" class="p-3 pt-0 space-y-3 border-t" style="border-color:var(--border)">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Fecha y hora de inicio</label>
+                <input v-model="form.fecha_hora_inicio" type="datetime-local"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Nivel de conflicto</label>
+                <select v-model="form.nivel_conflicto"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)">
+                  <option value="">Por establecer</option>
+                  <option value="Bajo">Bajo</option>
+                  <option value="Medio">Medio</option>
+                  <option value="Alto">Alto</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Zona</label>
+                <input v-model="form.zona_inicio" type="text" placeholder="Ej. 7"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Comisaría</label>
+                <input v-model="form.comisaria_inicio" type="text" placeholder="Ej. 14"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+            </div>
+            <div>
+              <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Referencia del punto</label>
+              <input v-model="form.referencia_inicio" type="text" placeholder="Punto de referencia del lugar"
+                class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Instrumentos utilizados</label>
+                <input v-model="form.instrumentos" type="text" placeholder="Pancartas, llantas, palos..."
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Presencia policial</label>
+                <input v-model="form.presencia_policial" type="text" placeholder="Efectivos y unidades"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Cantidad de vehículos</label>
+                <input v-model="form.cantidad_vehiculos" type="text" placeholder="Ej. 6 vehículos"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Actores</label>
+                <input v-model="form.actores" type="text" placeholder="Ej. Civiles"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+            </div>
+            <div>
+              <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Demandas / motivo</label>
+              <input v-model="form.demandas" type="text" placeholder="Ej. Por alza en precios del combustible"
+                class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+            </div>
+            <div>
+              <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Líderes identificados / menores / tercera edad</label>
+              <input v-model="form.lideres_vulnerables" type="text" placeholder="Detalle si aplica"
+                class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Finalización -->
+        <div class="rounded-lg border" style="border-color:var(--border)">
+          <button type="button" @click="showFinalizacion = !showFinalizacion"
+            class="w-full flex items-center justify-between px-3 py-2.5 text-left" style="color:var(--t2)">
+            <span class="font-mono text-xs uppercase tracking-wide">Finalización <span style="color:var(--t3)">(opcional)</span></span>
+            <svg class="w-4 h-4 transition-transform" :class="showFinalizacion ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div v-if="showFinalizacion" class="p-3 pt-0 space-y-3 border-t" style="border-color:var(--border)">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Fecha y hora de finalización</label>
+                <input v-model="form.fecha_hora_fin" type="datetime-local"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Personas al finalizar</label>
+                <input v-model="form.personas_fin" type="number" min="0"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+            </div>
+            <div>
+              <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Dirección de finalización</label>
+              <input v-model="form.direccion_fin" type="text" placeholder="Si es distinta al punto de inicio"
+                class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+            </div>
+            <div>
+              <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Referencia de finalización</label>
+              <input v-model="form.referencia_fin" type="text"
+                class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Latitud fin</label>
+                <input v-model="form.latitud_fin" type="number" step="any"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border font-mono"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Longitud fin</label>
+                <input v-model="form.longitud_fin" type="number" step="any"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border font-mono"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Departamento fin</label>
+                <select v-model="form.departamento_fin"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)">
+                  <option value="">—</option>
+                  <option v-for="d in departamentos" :key="d.nombre" :value="d.nombre">{{ d.nombre }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Municipio fin</label>
+                <select v-model="form.municipio_fin"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)">
+                  <option value="">—</option>
+                  <option v-for="m in municipiosFin" :key="m" :value="m">{{ m }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Zona fin</label>
+                <input v-model="form.zona_fin" type="text"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+              <div>
+                <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Comisaría fin</label>
+                <input v-model="form.comisaria_fin" type="text"
+                  class="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border"
+                  style="background:var(--bg);border-color:var(--border);color:var(--t1)" />
+              </div>
+            </div>
+            <p v-if="duracionCalculada" class="text-xs font-mono" style="color:var(--t3)">Duración: {{ duracionCalculada }}</p>
+          </div>
         </div>
 
         <!-- Observaciones -->
@@ -115,34 +298,41 @@
             @blur="$event.target.style.borderColor='var(--border)'"></textarea>
         </div>
 
-        <!-- Foto -->
+        <!-- Fotos -->
         <div>
-          <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">Foto</label>
-          <div v-if="fotoPreview" class="relative mb-2">
-            <img :src="fotoPreview" class="w-full h-32 object-cover rounded-lg border" style="border-color:var(--border)" />
-            <button type="button" @click="removePhoto"
-              class="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center border"
-              style="background:var(--surface);border-color:var(--border);color:var(--t2)">
-              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
+          <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">
+            Fotos <span style="color:var(--t3)">({{ existingFotos.length + newPreviews.length }}/{{ MAX_FOTOS }})</span>
+          </label>
+
+          <div v-if="existingFotos.length || newPreviews.length" class="grid grid-cols-4 gap-2 mb-2">
+            <div v-for="src in existingFotos" :key="src" class="relative">
+              <img :src="src" class="w-full h-16 object-cover rounded-lg border" style="border-color:var(--border)" />
+              <button type="button" @click="markRemoveExisting(src)"
+                class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center border"
+                style="background:var(--surface);border-color:#FECACA;color:#DC2626">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div v-for="(src, i) in newPreviews" :key="src" class="relative">
+              <img :src="src" class="w-full h-16 object-cover rounded-lg border" style="border-color:var(--border)" />
+              <button type="button" @click="removeNewPhoto(i)"
+                class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center border"
+                style="background:var(--surface);border-color:var(--border);color:var(--t2)">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
           </div>
-          <div v-else-if="bloqueo.foto_path && !removeOldPhoto" class="relative mb-2">
-            <img :src="apiBase + bloqueo.foto_path" class="w-full h-32 object-cover rounded-lg border" style="border-color:var(--border)" />
-            <button type="button" @click="removeOldPhoto = true"
-              class="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center border"
-              style="background:var(--surface);border-color:#FECACA;color:#DC2626">
-              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-          </div>
-          <label class="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors border border-dashed"
+
+          <label v-if="existingFotos.length + newPreviews.length < MAX_FOTOS"
+            class="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors border border-dashed"
             style="background:var(--bg);border-color:var(--border);color:var(--t3)"
             @mouseover="$event.currentTarget.style.borderColor='var(--accent)'"
             @mouseleave="$event.currentTarget.style.borderColor='var(--border)'">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
             </svg>
-            <span class="text-xs">{{ fotoFile ? fotoFile.name : 'Subir nueva foto' }}</span>
-            <input type="file" accept="image/*" class="hidden" @change="onPhoto" />
+            <span class="text-xs">Agregar fotos (máx. {{ MAX_FOTOS }})</span>
+            <input type="file" accept="image/*" multiple class="hidden" @change="onPhoto" />
           </label>
         </div>
 
@@ -172,38 +362,87 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTiposEvento } from '@/composables/useTiposEvento'
 import { departamentos as depList, getMunicipios } from '@/data/guatemala'
 import api from '@/api'
 
-const props = defineProps({ bloqueo: { type: Object, required: true } })
-const emit = defineEmits(['updated', 'close'])
+const props = defineProps({
+  bloqueo: { type: Object, required: true },
+  pendingCoords: { type: Object, default: null },
+  pickMode: { type: Boolean, default: false },
+})
+const emit = defineEmits(['updated', 'close', 'toggle-pick-mode'])
 
 const { tipos: tiposEvento } = useTiposEvento()
 const departamentos = depList
 const apiBase = import.meta.env.VITE_API_URL || ''
 
-const form = ref({ ...props.bloqueo })
-const fotoFile = ref(null)
-const fotoPreview = ref(null)
-const removeOldPhoto = ref(false)
+function toDatetimeLocal(iso) {
+  if (!iso) return ''
+  return iso.slice(0, 16)
+}
+
+const form = ref({
+  ...props.bloqueo,
+  fecha_hora_inicio: toDatetimeLocal(props.bloqueo.fecha_hora_inicio),
+  fecha_hora_fin: toDatetimeLocal(props.bloqueo.fecha_hora_fin),
+})
+const showDatosEvento = ref(false)
+const showFinalizacion = ref(false)
+const MAX_FOTOS = 8
+const existingFotos = ref((props.bloqueo.fotos && props.bloqueo.fotos.length ? props.bloqueo.fotos : (props.bloqueo.foto_path ? [props.bloqueo.foto_path] : [])).map((p) => apiBase + p))
+const fotosARemover = ref([])
+const newFiles = ref([])
+const newPreviews = ref([])
 const loading = ref(false)
 const error = ref('')
 
 const municipios = computed(() => getMunicipios(form.value.departamento))
+const municipiosFin = computed(() => getMunicipios(form.value.departamento_fin))
+
+watch(() => props.pendingCoords, (coords) => {
+  if (coords) {
+    form.value.latitud = coords.lat
+    form.value.longitud = coords.lng
+  }
+})
+
+const duracionCalculada = computed(() => {
+  if (!form.value.fecha_hora_inicio || !form.value.fecha_hora_fin) return null
+  const inicio = new Date(form.value.fecha_hora_inicio)
+  const fin = new Date(form.value.fecha_hora_fin)
+  const diffMin = Math.round((fin - inicio) / 60000)
+  if (isNaN(diffMin) || diffMin < 0) return null
+  const horas = Math.floor(diffMin / 60)
+  const minutos = diffMin % 60
+  if (horas && minutos) return `${horas}h ${minutos}min`
+  if (horas) return `${horas}h`
+  return `${minutos}min`
+})
 
 function onPhoto(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  fotoFile.value = file
-  fotoPreview.value = URL.createObjectURL(file)
-  removeOldPhoto.value = false
+  const files = Array.from(e.target.files || [])
+  const espacio = MAX_FOTOS - existingFotos.value.length - newFiles.value.length
+  files.slice(0, espacio).forEach((file) => {
+    newFiles.value.push(file)
+    newPreviews.value.push(URL.createObjectURL(file))
+  })
+  e.target.value = ''
 }
 
-function removePhoto() {
-  fotoFile.value = null
-  fotoPreview.value = null
+function removeNewPhoto(i) {
+  URL.revokeObjectURL(newPreviews.value[i])
+  newFiles.value.splice(i, 1)
+  newPreviews.value.splice(i, 1)
+}
+
+function markRemoveExisting(displaySrc) {
+  const idx = existingFotos.value.indexOf(displaySrc)
+  if (idx === -1) return
+  const originalPath = displaySrc.slice(apiBase.length)
+  fotosARemover.value.push(originalPath)
+  existingFotos.value.splice(idx, 1)
 }
 
 async function submit() {
@@ -220,8 +459,21 @@ async function submit() {
     fd.append('estado', form.value.estado)
     if (form.value.manifestantes_aproximados != null) fd.append('manifestantes_aproximados', form.value.manifestantes_aproximados)
     if (form.value.observaciones != null) fd.append('observaciones', form.value.observaciones)
-    if (removeOldPhoto.value) fd.append('remove_foto', 'true')
-    if (fotoFile.value) fd.append('foto', fotoFile.value)
+
+    const CAMPOS_MATRIZ = [
+      'fecha_hora_inicio', 'referencia_inicio', 'zona_inicio', 'comisaria_inicio',
+      'instrumentos', 'nivel_conflicto', 'presencia_policial', 'cantidad_vehiculos',
+      'demandas', 'actores', 'lideres_vulnerables',
+      'fecha_hora_fin', 'direccion_fin', 'latitud_fin', 'longitud_fin', 'referencia_fin',
+      'departamento_fin', 'municipio_fin', 'zona_fin', 'comisaria_fin', 'personas_fin',
+    ]
+    CAMPOS_MATRIZ.forEach((key) => {
+      const val = form.value[key]
+      if (val !== null && val !== undefined && val !== '') fd.append(key, val)
+    })
+
+    fotosARemover.value.forEach((path) => fd.append('remove_fotos', path))
+    newFiles.value.forEach((file) => fd.append('fotos', file))
 
     const { data } = await api.patch(`/api/bloqueos/${props.bloqueo.id}`, fd)
     emit('updated', data)

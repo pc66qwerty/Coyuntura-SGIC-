@@ -53,8 +53,8 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: 'Monitor Vial',
-        short_name: 'Monitor Vial',
+        name: 'Coyuntura SGIC',
+        short_name: 'Coyuntura SGIC',
         description: 'Sistema de monitoreo de eventos viales en Guatemala',
         theme_color: '#1E3A5F',
         background_color: '#ffffff',

@@ -1,212 +1,240 @@
-<template>
-  <div class="min-h-screen flex flex-col" style="background:var(--bg)">
-    <!-- Nav -->
-    <nav class="border-b" style="background:var(--surface);border-color:var(--border)">
-      <div class="max-w-5xl mx-auto px-6 py-4 flex items-center gap-4">
-        <router-link to="/" class="transition-colors" style="color:var(--t2)">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
-          </svg>
-        </router-link>
-        <span class="font-display font-semibold" style="color:var(--t1)">Centro de Ayuda</span>
-      </div>
-    </nav>
-
-    <div class="flex flex-1 max-w-5xl mx-auto w-full">
-      <!-- Sidebar -->
-      <aside class="w-56 shrink-0 p-5 border-r hidden md:block" style="background:var(--surface);border-color:var(--border)">
-        <p class="font-mono text-xs uppercase tracking-wide mb-3" style="color:var(--t3)">Secciones</p>
-        <ul class="space-y-1">
-          <li v-for="s in sections" :key="s.id">
-            <button @click="active = s.id"
-              class="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors font-medium"
-              :style="active === s.id
-                ? 'background:var(--accent);color:#fff'
-                : 'color:var(--t2)'">
-              {{ s.title }}
-            </button>
-          </li>
-        </ul>
-      </aside>
-
-      <!-- Content -->
-      <main class="flex-1 p-8 overflow-y-auto">
-        <!-- Mobile nav -->
-        <div class="md:hidden mb-6 flex gap-2 overflow-x-auto pb-2">
-          <button v-for="s in sections" :key="s.id" @click="active = s.id"
-            class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border"
-            :style="active === s.id
-              ? 'background:var(--accent);color:#fff;border-color:var(--accent)'
-              : 'color:var(--t2);background:var(--surface);border-color:var(--border)'">
-            {{ s.title }}
-          </button>
-        </div>
-
-        <!-- El mapa -->
-        <div v-if="active === 'mapa'">
-          <h1 class="font-display font-bold text-xl mb-4" style="color:var(--t1)">El mapa principal</h1>
-          <div class="space-y-4 text-sm leading-relaxed" style="color:var(--t2)">
-            <p>El mapa principal muestra todos los eventos viales registrados en tiempo real sobre un mapa interactivo de Guatemala.</p>
-            <div v-for="card in mapaCards" :key="card.title" class="rounded-xl p-4 border" style="background:var(--surface);border-color:var(--border)">
-              <p class="font-medium mb-2" style="color:var(--t1)">{{ card.title }}</p>
-              <ul class="space-y-1" style="color:var(--t2)">
-                <li v-for="item in card.items" :key="item">• {{ item }}</li>
-              </ul>
-            </div>
-            <p>El mapa se actualiza automáticamente cada 20 segundos. Recibirás una notificación cuando otro editor registre un nuevo evento.</p>
-          </div>
-        </div>
-
-        <!-- Tipos de evento -->
-        <div v-if="active === 'tipos'">
-          <h1 class="font-display font-bold text-xl mb-2" style="color:var(--t1)">Tipos de evento</h1>
-          <p class="text-sm mb-6" style="color:var(--t2)">Cada tipo tiene un color e icono distintivo para identificarlo rápidamente en el mapa.</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div v-for="tipo in tiposEvento" :key="tipo.nombre"
-              class="flex items-center gap-3 rounded-xl p-3 border"
-              style="background:var(--surface);border-color:var(--border)">
-              <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" :style="{ background: tipo.color }">
-                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="white">
-                  <path stroke-linecap="round" stroke-linejoin="round" :d="tipo.iconD" />
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-sm" style="color:var(--t1)">{{ tipo.nombre }}</p>
-                <p class="text-xs" style="color:var(--t2)">{{ tipo.desc }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Filtros -->
-        <div v-if="active === 'filtros'">
-          <h1 class="font-display font-bold text-xl mb-4" style="color:var(--t1)">Buscar y filtrar eventos</h1>
-          <div class="space-y-4 text-sm leading-relaxed" style="color:var(--t2)">
-            <div v-for="card in filtroCards" :key="card.title" class="rounded-xl p-4 border" style="background:var(--surface);border-color:var(--border)">
-              <p class="font-medium mb-2" style="color:var(--t1)">{{ card.title }}</p>
-              <ul class="space-y-1">
-                <li v-for="item in card.items" :key="item">• {{ item }}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Dashboard -->
-        <div v-if="active === 'dashboard'">
-          <h1 class="font-display font-bold text-xl mb-4" style="color:var(--t1)">Panel de control</h1>
-          <p class="text-sm mb-4" style="color:var(--t2)">El panel de control está disponible solo para usuarios con rol Editor.</p>
-          <div class="space-y-3">
-            <div v-for="card in dashboardCards" :key="card.title" class="rounded-xl p-4 border" style="background:var(--surface);border-color:var(--border)">
-              <p class="font-medium text-sm mb-1" style="color:var(--t1)">{{ card.title }}</p>
-              <p class="text-sm" style="color:var(--t2)">{{ card.body }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Registrar -->
-        <div v-if="active === 'registrar'">
-          <h1 class="font-display font-bold text-xl mb-4" style="color:var(--t1)">Registrar un evento</h1>
-          <p class="text-sm mb-5" style="color:var(--t2)">Solo los usuarios Editor pueden registrar eventos. Sigue estos pasos:</p>
-          <ol class="space-y-4">
-            <li v-for="(step, i) in steps" :key="i" class="flex gap-4">
-              <span class="w-7 h-7 rounded-full text-white text-sm font-semibold flex items-center justify-center shrink-0" style="background:var(--accent)">{{ i + 1 }}</span>
-              <div>
-                <p class="font-medium text-sm" style="color:var(--t1)">{{ step.title }}</p>
-                <p class="text-xs mt-1" style="color:var(--t2)">{{ step.desc }}</p>
-              </div>
-            </li>
-          </ol>
-        </div>
-
-        <!-- Roles -->
-        <div v-if="active === 'roles'">
-          <h1 class="font-display font-bold text-xl mb-4" style="color:var(--t1)">Roles de usuario</h1>
-          <div class="space-y-4">
-            <div class="rounded-xl p-5 border" style="background:var(--accent-dim);border-color:var(--accent)">
-              <div class="flex items-center gap-3 mb-3">
-                <span class="px-2.5 py-0.5 text-white text-xs font-semibold rounded-full" style="background:var(--accent)">Editor</span>
-                <span class="font-medium text-sm" style="color:var(--t1)">Acceso completo</span>
-              </div>
-              <ul class="text-sm space-y-1.5" style="color:var(--t2)">
-                <li v-for="item in editorPerms" :key="item">✓ {{ item }}</li>
-              </ul>
-            </div>
-            <div class="rounded-xl p-5 border" style="background:var(--surface);border-color:var(--border)">
-              <div class="flex items-center gap-3 mb-3">
-                <span class="px-2.5 py-0.5 text-white text-xs font-semibold rounded-full" style="background:var(--t2)">Lector</span>
-                <span class="font-medium text-sm" style="color:var(--t1)">Solo lectura</span>
-              </div>
-              <ul class="text-sm space-y-1.5" style="color:var(--t2)">
-                <li v-for="item in lectorPerms" :key="item.text" :style="item.denied ? 'color:var(--t3)' : ''">
-                  {{ item.denied ? '✗' : '✓' }} {{ item.text }}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  </div>
-</template>
-
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useTiposEvento } from '@/composables/useTiposEvento'
+import AppFooter from '@/components/AppFooter.vue'
 
-const active = ref('mapa')
+const { tipos, load: loadTipos } = useTiposEvento()
+onMounted(loadTipos)
 
-const sections = [
-  { id: 'mapa',      title: 'El mapa principal' },
-  { id: 'tipos',     title: 'Tipos de evento' },
-  { id: 'filtros',   title: 'Buscar y filtrar' },
-  { id: 'dashboard', title: 'Panel de control' },
-  { id: 'registrar', title: 'Registrar evento' },
-  { id: 'roles',     title: 'Roles de usuario' },
-]
+const seccionAbierta = ref('mapa')
 
-const mapaCards = [
-  { title: 'Navegación:', items: ['Zoom: Rueda del ratón o botones +/-', 'Mover: Clic y arrastrar', 'Ver evento: Clic en cualquier marcador'] },
-  { title: 'Marcadores:', items: ['Los marcadores con animación pulsante son eventos activos', 'Los marcadores grises son eventos finalizados', 'El color de cada marcador corresponde al tipo de evento'] },
-  { title: 'Controles del mapa:', items: ['Tema mapa: Alterna entre mapa oscuro y claro', 'Tema UI: Alterna entre interfaz oscura y clara', 'Botón Panel: Acceso al dashboard (solo editores)'] },
-]
-
-const filtroCards = [
-  { title: 'Búsqueda por texto', items: ['Busca en tipo de evento, municipio, departamento o dirección'] },
-  { title: 'Filtro por período', items: ['Hoy / Ayer: Solo eventos del día seleccionado', 'Últimos 7/30 días: Ventana móvil de tiempo', 'Todos: Sin límite de tiempo', 'Rango personalizado: Selecciona fecha inicio y fin'] },
-  { title: 'Otros filtros', items: ['Estado: Activo, Finalizado o Todos', 'Tipo de evento: Filtra por categoría', 'Departamento: Solo eventos de ese departamento', 'Ordenar: Más reciente, Más antiguo, Activos primero'] },
-]
-
-const dashboardCards = [
-  { title: 'Estadísticas en tiempo real', body: 'Total, activos y finalizados con porcentajes. Desglose por tipo de evento y top departamentos con más actividad.' },
-  { title: 'Lista de eventos', body: 'Busca, filtra y gestiona todos los eventos. Enfoca el mapa, edita, cambia estado o elimina eventos directamente desde la lista.' },
-  { title: 'Reportes', body: 'Exporta en CSV para hojas de cálculo, o genera un reporte PDF con estadísticas y tabla completa de eventos.' },
-  { title: 'Auto-actualización', body: 'Los datos se actualizan automáticamente cada 30 segundos. Recibirás una notificación cuando otro editor registre eventos.' },
-]
-
-const steps = [
-  { title: 'Seleccionar tipo de evento', desc: 'Elige el tipo que mejor describe la situación.' },
-  { title: 'Seleccionar ubicación', desc: 'Escoge el departamento y municipio. El mapa se centrará automáticamente en esa área.' },
-  { title: 'Ingresar dirección', desc: 'Usa los prefijos rápidos para agilizar el ingreso.' },
-  { title: 'Seleccionar coordenadas', desc: 'Haz clic en "Seleccionar en mapa" y luego en el punto exacto para obtener las coordenadas GPS.' },
-  { title: 'Datos adicionales y envío', desc: 'Agrega cantidad de personas, observaciones y foto opcional. Haz clic en "Registrar evento".' },
-]
-
-const editorPerms = ['Ver mapa y eventos', 'Registrar nuevos eventos', 'Editar y eliminar eventos', 'Cambiar estado (Activo/Finalizado)', 'Gestionar usuarios', 'Exportar reportes CSV y PDF', 'Acceder al panel de control']
-const lectorPerms = [
-  { text: 'Ver mapa en tiempo real', denied: false },
-  { text: 'Ver detalles de eventos', denied: false },
-  { text: 'Filtrar y buscar eventos', denied: false },
-  { text: 'Consultar el centro de ayuda', denied: false },
-  { text: 'Registrar o editar eventos', denied: true },
-  { text: 'Gestionar usuarios', denied: true },
-  { text: 'Exportar reportes', denied: true },
-]
-
-const tiposEvento = [
-  { nombre: 'Emergencia',    color: '#dc2626', desc: 'Situaciones de emergencia inmediata', iconD: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z' },
-  { nombre: 'Accidente vial',color: '#ea580c', desc: 'Colisiones y accidentes de tránsito',  iconD: 'M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25' },
-  { nombre: 'Bloqueo',       color: '#7c3aed', desc: 'Cierre o bloqueo de vía',              iconD: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636' },
-  { nombre: 'Asistencia vial',color:'#2563eb', desc: 'Asistencia mecánica o remolque',       iconD: 'M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877' },
-  { nombre: 'Trabajos',      color: '#d97706', desc: 'Obras viales o mantenimiento',          iconD: 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z' },
-  { nombre: 'Libre',         color: '#16a34a', desc: 'Vía despejada o resuelta',              iconD: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+const secciones = [
+  { id: 'mapa', label: 'El mapa principal', icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7' },
+  { id: 'eventos', label: 'Tipos de evento', icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+  { id: 'filtros', label: 'Buscar y filtrar', icon: 'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z' },
+  { id: 'panel', label: 'Panel de control', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+  { id: 'registro', label: 'Registrar un evento', icon: 'M12 4v16m8-8H4' },
+  { id: 'roles', label: 'Roles de usuario', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
 ]
 </script>
+
+<template>
+  <div class="min-h-screen bg-slate-100 dark:bg-gray-950">
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+
+      <!-- Encabezado -->
+      <div class="mb-8">
+        <div class="flex items-center gap-3 mb-2">
+          <router-link to="/" class="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition" title="Volver al mapa">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+            </svg>
+          </router-link>
+          <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-2xl font-black text-gray-900 dark:text-white">Centro de Ayuda</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Guía de uso del sistema Coyuntura SGIC</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- Navegacion lateral -->
+        <nav class="lg:col-span-1">
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-3 sticky top-4">
+            <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-2">Secciones</p>
+            <button v-for="s in secciones" :key="s.id"
+              @click="seccionAbierta = s.id"
+              class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all mb-0.5"
+              :class="seccionAbierta === s.id
+                ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="s.icon"/>
+              </svg>
+              {{ s.label }}
+            </button>
+          </div>
+        </nav>
+
+        <!-- Contenido -->
+        <div class="lg:col-span-3 space-y-4">
+
+          <!-- EL MAPA PRINCIPAL -->
+          <div v-if="seccionAbierta === 'mapa'" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+            <h2 class="text-lg font-black text-gray-900 dark:text-white mb-4">El mapa principal</h2>
+            <div class="space-y-4 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p>Al ingresar al sistema verá un mapa interactivo con todos los eventos viales registrados en Guatemala. Cada evento se representa con un marcador de color según su tipo.</p>
+              <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                <p class="font-bold text-gray-700 dark:text-gray-200 mb-2">Cómo navegar el mapa</p>
+                <ul class="space-y-1.5">
+                  <li class="flex items-start gap-2"><span class="text-indigo-500 font-bold mt-0.5">+/-</span> Botones de zoom en la esquina inferior izquierda para acercar o alejar.</li>
+                  <li class="flex items-start gap-2"><span class="text-indigo-500 font-bold mt-0.5">Arrastrar</span> Mantén presionado y mueve para desplazarte por el mapa.</li>
+                  <li class="flex items-start gap-2"><span class="text-indigo-500 font-bold mt-0.5">Clic en marcador</span> Hace zoom automático al evento y muestra su información detallada.</li>
+                </ul>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                <p class="font-bold text-gray-700 dark:text-gray-200 mb-2">Botones del mapa</p>
+                <ul class="space-y-1.5">
+                  <li><span class="font-semibold text-gray-700 dark:text-gray-300">Mapa Claro / Oscuro:</span> Cambia el estilo del mapa entre modo oscuro y modo estándar (OpenStreetMap).</li>
+                  <li><span class="font-semibold text-gray-700 dark:text-gray-300">Sol / Luna (esquina superior):</span> Cambia el tema visual de toda la interfaz entre claro y oscuro.</li>
+                </ul>
+              </div>
+              <p class="text-xs text-gray-400 dark:text-gray-500">Los marcadores con animación de pulso son eventos activos en curso. Los marcadores opacos son eventos finalizados.</p>
+            </div>
+          </div>
+
+          <!-- TIPOS DE EVENTO -->
+          <div v-if="seccionAbierta === 'eventos'" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+            <h2 class="text-lg font-black text-gray-900 dark:text-white mb-4">Tipos de evento</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">El sistema maneja los siguientes tipos de evento vial. Cada uno tiene un color e ícono distinto en el mapa para identificarse rápidamente.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div v-for="tipo in tipos" :key="tipo.nombre"
+                class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                <span class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  :style="`background:${tipo.color}`">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" v-html="tipo.iconPath"/>
+                </span>
+                <div>
+                  <p class="font-bold text-sm text-gray-800 dark:text-gray-200">{{ tipo.nombre }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 text-sm text-amber-700 dark:text-amber-400">
+              Al registrar un evento, debe seleccionar el tipo que mejor describe la situación vial reportada. Un Editor puede crear tipos adicionales desde la sección "Tipos de evento" del panel.
+            </div>
+          </div>
+
+          <!-- BUSCAR Y FILTRAR -->
+          <div v-if="seccionAbierta === 'filtros'" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+            <h2 class="text-lg font-black text-gray-900 dark:text-white mb-4">Buscar y filtrar eventos</h2>
+            <div class="space-y-4 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p>En la página principal puedes filtrar los eventos usando el panel de filtros sobre la lista de eventos.</p>
+              <div class="space-y-3">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <p class="font-bold text-gray-700 dark:text-gray-200 mb-2">Búsqueda por texto</p>
+                  <p>Escribe cualquier término en el campo de búsqueda: tipo de evento, dirección, municipio o departamento. La lista y el mapa se actualizan en tiempo real.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <p class="font-bold text-gray-700 dark:text-gray-200 mb-2">Filtro por período</p>
+                  <p>Filtra eventos por cuándo fueron registrados: Hoy, Ayer, Últimos 7 días, Últimos 30 días, Todo, o un rango de fechas personalizado.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <p class="font-bold text-gray-700 dark:text-gray-200 mb-2">Filtro por estado, tipo y departamento</p>
+                  <p>Selecciona Activo/Inactivo, un tipo de evento específico o un departamento para ver solo esos marcadores en el mapa y esas tarjetas en la lista.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <p class="font-bold text-gray-700 dark:text-gray-200 mb-2">Ordenar resultados</p>
+                  <p>Puedes ordenar la lista por más reciente, más antiguo o mostrando los eventos activos primero.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL DE CONTROL -->
+          <div v-if="seccionAbierta === 'panel'" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+            <h2 class="text-lg font-black text-gray-900 dark:text-white mb-4">Panel de control</h2>
+            <div class="space-y-4 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p>El panel de control es accesible solo para usuarios con rol de <strong class="text-gray-800 dark:text-gray-200">Editor</strong>. Desde aquí puedes gestionar todos los eventos del sistema.</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <p class="font-bold text-gray-700 dark:text-gray-200 mb-1">Estadísticas</p>
+                  <p>Resumen de eventos totales, activos, finalizados y un desglose por tipo de evento.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <p class="font-bold text-gray-700 dark:text-gray-200 mb-1">Focos por departamento</p>
+                  <p>Ranking de los departamentos con más eventos activos en el momento.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <p class="font-bold text-gray-700 dark:text-gray-200 mb-1">Lista de eventos</p>
+                  <p>Puedes buscar, filtrar por estado y fechas, y realizar acciones sobre cada evento registrado.</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <p class="font-bold text-gray-700 dark:text-gray-200 mb-1">Actualización automática</p>
+                  <p>El panel se actualiza cada 30 segundos y notifica cuando otro editor registra un nuevo evento.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- REGISTRAR UN EVENTO -->
+          <div v-if="seccionAbierta === 'registro'" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+            <h2 class="text-lg font-black text-gray-900 dark:text-white mb-4">Registrar un evento</h2>
+            <div class="space-y-3 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p>Solo los usuarios con rol <strong class="text-gray-800 dark:text-gray-200">Editor</strong> pueden registrar, editar y eliminar eventos.</p>
+              <ol class="space-y-3">
+                <li class="flex gap-3">
+                  <span class="w-6 h-6 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0 mt-0.5">1</span>
+                  <div><strong class="text-gray-700 dark:text-gray-300">Abra el panel de control</strong> — desde el botón "Panel" en el mapa principal, y despliegue "Registrar Nuevo Evento".</div>
+                </li>
+                <li class="flex gap-3">
+                  <span class="w-6 h-6 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0 mt-0.5">2</span>
+                  <div><strong class="text-gray-700 dark:text-gray-300">Seleccione el tipo de evento</strong> — elija el tipo que mejor describe la situación (Bloqueo, Accidente, Emergencia, etc.).</div>
+                </li>
+                <li class="flex gap-3">
+                  <span class="w-6 h-6 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0 mt-0.5">3</span>
+                  <div><strong class="text-gray-700 dark:text-gray-300">Complete departamento, municipio y dirección</strong> — describa la ubicación exacta o referencia del evento.</div>
+                </li>
+                <li class="flex gap-3">
+                  <span class="w-6 h-6 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0 mt-0.5">4</span>
+                  <div><strong class="text-gray-700 dark:text-gray-300">Marque las coordenadas GPS</strong> — use "Elegir punto" y luego haga clic en el punto exacto del mapa donde ocurre el evento. Las coordenadas se llenan automáticamente.</div>
+                </li>
+                <li class="flex gap-3">
+                  <span class="w-6 h-6 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0 mt-0.5">5</span>
+                  <div><strong class="text-gray-700 dark:text-gray-300">Guarde el evento</strong> — el marcador aparecerá de inmediato en el mapa y en la lista.</div>
+                </li>
+              </ol>
+              <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mt-2">
+                <p class="font-bold text-blue-700 dark:text-blue-400 mb-1">Actualizar estado</p>
+                <p class="text-blue-600 dark:text-blue-300">Cuando un evento se resuelve, cambie su estado a <strong>Inactivo</strong> desde la lista del panel. Esto mantiene el historial y retira la animación del marcador.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ROLES DE USUARIO -->
+          <div v-if="seccionAbierta === 'roles'" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+            <h2 class="text-lg font-black text-gray-900 dark:text-white mb-4">Roles de usuario</h2>
+            <div class="space-y-4 text-sm text-gray-600 dark:text-gray-300">
+              <div class="border border-indigo-200 dark:border-indigo-800 rounded-xl overflow-hidden">
+                <div class="bg-indigo-50 dark:bg-indigo-900/30 px-4 py-3 flex items-center gap-2">
+                  <span class="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-white font-black text-xs">E</span>
+                  <p class="font-bold text-indigo-700 dark:text-indigo-400">Editor</p>
+                </div>
+                <div class="p-4 space-y-1">
+                  <p>— Acceso completo al mapa y al panel de control.</p>
+                  <p>— Puede registrar, editar y eliminar eventos.</p>
+                  <p>— Puede gestionar usuarios (crear, cambiar roles, restablecer contraseñas, eliminar).</p>
+                  <p>— Puede exportar reportes en CSV y PDF.</p>
+                </div>
+              </div>
+              <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 flex items-center gap-2">
+                  <span class="w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center text-white font-black text-xs">L</span>
+                  <p class="font-bold text-gray-700 dark:text-gray-300">Lector</p>
+                </div>
+                <div class="p-4 space-y-1">
+                  <p>— Acceso al mapa principal para consulta.</p>
+                  <p>— Puede visualizar todos los eventos activos y finalizados.</p>
+                  <p>— Puede usar los filtros de búsqueda.</p>
+                  <p>— No puede registrar ni modificar eventos.</p>
+                  <p>— No tiene acceso al panel de control.</p>
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 dark:text-gray-500">Los usuarios son creados por un Editor desde la sección Usuarios del panel.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <AppFooter />
+  </div>
+</template>

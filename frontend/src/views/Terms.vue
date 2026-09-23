@@ -1,63 +1,3 @@
-<template>
-  <div class="min-h-screen flex flex-col" style="background:var(--bg)">
-    <!-- Header -->
-    <header class="shrink-0 border-b" style="background:var(--surface);border-color:var(--border)">
-      <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--accent)">
-            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c-.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/>
-            </svg>
-          </div>
-          <span class="font-display font-semibold text-sm" style="color:var(--t1)">Monitor Vial</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="font-mono text-xs px-3 py-1 rounded-full border" style="color:var(--warning);background:rgba(217,119,6,.08);border-color:rgba(217,119,6,.25)">
-            Acepta para continuar
-          </span>
-          <div class="theme-switch" aria-label="Tema visual">
-            <button type="button" :class="{ active: theme === 'light' }" @click="applyTheme('light')">Claro</button>
-            <button type="button" :class="{ active: theme === 'dark' }" @click="applyTheme('dark')">Oscuro</button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Content -->
-    <div class="flex-1 max-w-3xl mx-auto w-full px-6 py-10 overflow-y-auto">
-      <h1 class="font-display text-3xl font-bold mb-1" style="color:var(--t1)">Términos y Condiciones de Uso</h1>
-      <p class="font-mono text-xs mb-10" style="color:var(--t2)">Monitor Vial — Sistema de Monitoreo de Eventos Viales</p>
-
-      <div class="space-y-8 text-sm leading-relaxed" style="color:var(--t2)">
-        <section v-for="(art, i) in articles" :key="i">
-          <h2 class="font-display font-semibold text-base mb-2" style="color:var(--t1)">{{ art.title }}</h2>
-          <p>{{ art.body }}</p>
-        </section>
-      </div>
-
-      <!-- Acceptance -->
-      <div class="mt-12 pt-8 border-t" style="border-color:var(--border)">
-        <label class="flex items-start gap-3 cursor-pointer mb-5">
-          <input v-model="accepted" type="checkbox" class="mt-0.5 w-4 h-4 rounded" style="accent-color:var(--accent)" />
-          <span class="text-sm" style="color:var(--t1)">
-            He leído, comprendido y acepto los Términos y Condiciones de uso del sistema Monitor Vial.
-          </span>
-        </label>
-
-        <button @click="accept" :disabled="!accepted || loading"
-          class="w-full py-3 text-white font-medium rounded-xl text-sm flex items-center justify-center gap-2 transition-colors"
-          :style="{ background: (!accepted || loading) ? 'var(--t3)' : 'var(--accent)', cursor: (!accepted || loading) ? 'not-allowed' : 'pointer' }">
-          <svg v-if="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-          </svg>
-          {{ loading ? 'Procesando...' : 'Aceptar y continuar' }}
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -68,6 +8,10 @@ import api from '@/api'
 const router = useRouter()
 const auth = useAuthStore()
 const { theme, apply: applyTheme } = useTheme()
+
+function toggleTheme() {
+  applyTheme(theme.value === 'dark' ? 'light' : 'dark')
+}
 
 const accepted = ref(false)
 const loading = ref(false)
@@ -97,36 +41,92 @@ async function accept() {
 }
 </script>
 
-<style scoped>
-.theme-switch {
-  display: inline-grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  min-height: 36px;
-  padding: 4px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg);
-}
+<template>
+  <div class="min-h-screen bg-slate-100 dark:bg-gray-950 py-10 px-4">
 
-.theme-switch button {
-  min-width: 58px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--t2);
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-}
+    <!-- Boton tema -->
+    <button @click="toggleTheme"
+      class="fixed top-4 right-4 z-50 p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white shadow transition"
+      :title="theme === 'dark' ? 'Modo claro' : 'Modo oscuro'">
+      <svg v-if="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+      </svg>
+      <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+      </svg>
+    </button>
 
-.theme-switch button.active {
-  background: var(--surface);
-  color: var(--t1);
-  box-shadow: inset 0 0 0 1px var(--border);
-}
+    <div class="max-w-3xl mx-auto">
 
-.theme-switch button:hover {
-  color: var(--accent);
-}
-</style>
+      <!-- Encabezado -->
+      <div class="flex items-center gap-4 mb-8">
+        <img src="/logo-sgic.png" alt="Coyuntura SGIC" class="w-14 h-14 object-contain flex-shrink-0" />
+        <div>
+          <h1 class="text-2xl font-black text-gray-900 dark:text-white">Coyuntura SGIC</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Para continuar debe leer y aceptar los términos y condiciones de uso.</p>
+        </div>
+      </div>
+
+      <!-- Documento -->
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden mb-6">
+
+        <!-- Titulo del documento -->
+        <div class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-8 py-5">
+          <h2 class="text-lg font-bold text-gray-900 dark:text-white">Términos y Condiciones de Uso</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Coyuntura SGIC — Sistema de Monitoreo de Eventos Viales</p>
+        </div>
+
+        <!-- Contenido scrolleable -->
+        <div class="px-8 py-6 max-h-[520px] overflow-y-auto text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-6 scroll-smooth">
+          <section v-for="(art, i) in articles" :key="i">
+            <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ art.title }}</h3>
+            <p>{{ art.body }}</p>
+          </section>
+        </div>
+      </div>
+
+      <!-- Confirmacion y boton -->
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl px-8 py-6 shadow-sm">
+
+        <label class="flex items-start gap-3 cursor-pointer mb-6">
+          <div class="relative mt-0.5 flex-shrink-0">
+            <input type="checkbox" v-model="accepted" class="sr-only peer" />
+            <div class="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 peer-checked:bg-red-600 peer-checked:border-red-600 transition-colors flex items-center justify-center">
+              <svg v-if="accepted" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+          </div>
+          <span class="text-sm text-gray-700 dark:text-gray-300 leading-snug">
+            He leído, comprendido y acepto en su totalidad los Términos y Condiciones de Uso del sistema Coyuntura SGIC.
+            Entiendo que esta aceptación queda registrada con fecha y hora como constancia formal.
+          </span>
+        </label>
+
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <p class="text-xs text-gray-400 dark:text-gray-500">
+            Debe marcar la casilla para continuar.
+          </p>
+          <button
+            type="button"
+            @click="accept"
+            :disabled="!accepted || loading"
+            class="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition shadow-lg
+                   disabled:opacity-40 disabled:cursor-not-allowed
+                   bg-red-600 hover:bg-red-500 disabled:hover:bg-red-600
+                   text-white shadow-red-900/30">
+            <svg v-if="loading" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {{ loading ? 'Procesando...' : 'Acepto los términos y condiciones' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</template>

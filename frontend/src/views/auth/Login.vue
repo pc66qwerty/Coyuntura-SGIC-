@@ -1,105 +1,3 @@
-<template>
-  <main class="login-page">
-    <div class="theme-switch" aria-label="Tema visual">
-      <button type="button" :class="{ active: theme === 'light' }" @click="applyTheme('light')">Claro</button>
-      <button type="button" :class="{ active: theme === 'dark' }" @click="applyTheme('dark')">Oscuro</button>
-    </div>
-
-    <section class="login-wrap" aria-label="Inicio de sesion">
-      <header class="login-title">
-        <span class="brand-mark">MV</span>
-        <h1>Monitor Vial</h1>
-      </header>
-
-      <div class="login-card">
-        <header class="form-head">
-          <p class="section-kicker">Inicio de sesion</p>
-          <h2>Entrar al panel</h2>
-          <p>Usa tus credenciales asignadas para continuar.</p>
-        </header>
-
-        <form @submit.prevent="submit" class="form-body" novalidate>
-          <div class="field" :class="{ 'is-active': emailFocused }">
-            <label class="field-label" for="login-email">Correo electronico</label>
-            <div class="field-row">
-              <svg class="field-ico" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-              </svg>
-              <input
-                id="login-email"
-                v-model="form.email"
-                type="email"
-                required
-                autocomplete="email"
-                class="field-input"
-                placeholder="correo@institucion.gob.gt"
-                @focus="emailFocused = true"
-                @blur="emailFocused = false"
-              />
-            </div>
-          </div>
-
-          <div class="field" :class="{ 'is-active': passwordFocused }">
-            <label class="field-label" for="login-password">Contrasena</label>
-            <div class="field-row">
-              <svg class="field-ico" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z" />
-              </svg>
-              <input
-                id="login-password"
-                v-model="form.password"
-                :type="showPassword ? 'text' : 'password'"
-                required
-                autocomplete="current-password"
-                class="field-input"
-                placeholder="Tu contrasena"
-                @focus="passwordFocused = true"
-                @blur="passwordFocused = false"
-              />
-              <button
-                type="button"
-                @click="showPassword = !showPassword"
-                class="eye-btn"
-                :aria-label="showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'"
-              >
-                <svg v-if="!showPassword" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                </svg>
-                <svg v-else class="icon-sm" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div v-if="error" class="error-block" role="alert">
-            <svg class="icon-sm" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0zm-9 3.75h.008v.008H12v-.008z" />
-            </svg>
-            {{ error }}
-          </div>
-
-          <div class="aux-row">
-            <router-link to="/forgot-password" class="aux-link">Olvide mi contrasena</router-link>
-          </div>
-
-          <button type="submit" :disabled="loading" class="submit-btn">
-            <svg v-if="loading" class="spinner icon-sm" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            <span>{{ loading ? 'Verificando...' : 'Ingresar' }}</span>
-            <svg v-if="!loading" class="icon-sm" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0-6.75-6.75M19.5 12l-6.75 6.75" />
-            </svg>
-          </button>
-        </form>
-      </div>
-    </section>
-  </main>
-</template>
-
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -111,12 +9,14 @@ const router = useRouter()
 const auth = useAuthStore()
 const { theme, apply: applyTheme } = useTheme()
 
+function toggleTheme() {
+  applyTheme(theme.value === 'dark' ? 'light' : 'dark')
+}
+
 const form = ref({ email: '', password: '' })
 const showPassword = ref(false)
 const loading = ref(false)
 const error = ref('')
-const emailFocused = ref(false)
-const passwordFocused = ref(false)
 
 async function submit() {
   error.value = ''
@@ -133,333 +33,114 @@ async function submit() {
 }
 </script>
 
-<style scoped>
-.login-page {
-  --page-bg: #f4f2ec;
-  --panel: #fffdf8;
-  --panel-soft: #ebe6d9;
-  --ink: #17202a;
-  --muted: #66707c;
-  --faint: #a8adad;
-  --line: #d8d2c4;
-  --primary: #1e3a5f;
-  --primary-strong: #143050;
-  --accent: #b88746;
-  --danger: #b42318;
-  --danger-bg: #fff0ed;
+<template>
+  <div class="min-h-screen bg-slate-100 dark:bg-gray-950 flex items-center justify-center p-6">
 
-  min-height: 100vh;
-  background: var(--page-bg);
-  color: var(--ink);
-  display: grid;
-  place-items: center;
-  font-family: 'DM Sans', sans-serif;
-  padding: 28px;
-  position: relative;
-}
+    <!-- Boton tema -->
+    <button @click="toggleTheme"
+      class="fixed top-4 right-4 z-50 p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white shadow transition"
+      :title="theme === 'dark' ? 'Modo claro' : 'Modo oscuro'">
+      <svg v-if="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+      </svg>
+      <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+      </svg>
+    </button>
 
-:global(html.dark) .login-page {
-  --page-bg: #0b1118;
-  --panel: #111923;
-  --panel-soft: #162230;
-  --ink: #e9edf0;
-  --muted: #8b97a5;
-  --faint: #3b4856;
-  --line: #263342;
-  --primary: #6fa8dc;
-  --primary-strong: #8dbde7;
-  --accent: #d7a45a;
-  --danger: #f97066;
-  --danger-bg: #311815;
-}
+    <div class="w-full max-w-md">
 
-.theme-switch {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  display: inline-grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  min-height: 36px;
-  padding: 4px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: var(--panel);
-}
+      <!-- Encabezado de marca -->
+      <div class="flex flex-col items-center gap-3 mb-6 text-center">
+        <img src="/logo-sgic.png" alt="Coyuntura SGIC" class="w-14 h-14 object-contain" />
+        <h1 class="text-3xl font-black text-gray-900 dark:text-white leading-none">Coyuntura SGIC</h1>
+      </div>
 
-.theme-switch button {
-  min-width: 58px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-}
+      <!-- Card -->
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-8">
+        <div class="mb-6">
+          <p class="text-xs font-bold uppercase tracking-widest text-red-500 dark:text-red-400 mb-1.5">Inicio de sesión</p>
+          <h2 class="text-2xl font-black text-gray-900 dark:text-white">Entrar al panel</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Usa tus credenciales asignadas para continuar.</p>
+        </div>
 
-.theme-switch button.active {
-  background: var(--page-bg);
-  color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--line);
-}
+        <form @submit.prevent="submit" class="space-y-4" novalidate>
+          <div>
+            <label for="login-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Correo electrónico</label>
+            <div class="relative">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+              </svg>
+              <input
+                id="login-email"
+                v-model="form.email"
+                type="email"
+                required
+                autocomplete="email"
+                placeholder="correo@institucion.gob.gt"
+                class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 rounded-xl pl-10 pr-3 py-2.5 text-sm transition-colors focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+              />
+            </div>
+          </div>
 
-.theme-switch button:hover {
-  color: var(--primary);
-}
+          <div>
+            <label for="login-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Contraseña</label>
+            <div class="relative">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+              </svg>
+              <input
+                id="login-password"
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                required
+                autocomplete="current-password"
+                placeholder="Tu contraseña"
+                class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 rounded-xl pl-10 pr-10 py-2.5 text-sm transition-colors focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+              />
+              <button
+                type="button"
+                @click="showPassword = !showPassword"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              >
+                <svg v-if="!showPassword" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <svg v-else class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/>
+                </svg>
+              </button>
+            </div>
+          </div>
 
-.theme-switch button:focus-visible,
-.eye-btn:focus-visible,
-.aux-link:focus-visible,
-.submit-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
+          <div v-if="error" class="flex items-center gap-2 text-xs px-3 py-2.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+            </svg>
+            {{ error }}
+          </div>
 
-.login-wrap {
-  width: min(430px, 100%);
-}
+          <div class="flex justify-end -mt-1">
+            <router-link to="/forgot-password" class="text-xs text-gray-500 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition">
+              Olvidé mi contraseña
+            </router-link>
+          </div>
 
-.login-title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-.brand-mark {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--primary);
-  background: var(--primary);
-  color: #fff;
-  border-radius: 8px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  font-size: 22px;
-}
-
-.login-title h1 {
-  margin: 0;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 48px;
-  line-height: 0.95;
-  color: var(--ink);
-}
-
-.login-card {
-  width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
-  padding: 34px;
-  box-shadow: 0 24px 70px rgba(22, 32, 42, 0.1);
-}
-
-:global(html.dark) .login-card {
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
-}
-
-.form-head {
-  margin-bottom: 30px;
-}
-
-.section-kicker {
-  margin: 0 0 10px;
-  color: var(--accent);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0;
-}
-
-.form-head h2 {
-  margin: 0 0 10px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 38px;
-  line-height: 0.95;
-  color: var(--ink);
-}
-
-.form-head p:last-child {
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.form-body {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.field-label {
-  font-size: 13px;
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.field-row {
-  min-height: 50px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--panel) 88%, var(--panel-soft));
-  padding: 0 14px;
-  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
-}
-
-.field.is-active .field-row {
-  border-color: var(--primary);
-  background: var(--panel);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 13%, transparent);
-}
-
-.field-ico {
-  width: 17px;
-  height: 17px;
-  color: var(--faint);
-  flex: 0 0 auto;
-}
-
-.field.is-active .field-ico {
-  color: var(--primary);
-}
-
-.field-input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--ink);
-  font-size: 14px;
-}
-
-.field-input::placeholder {
-  color: var(--faint);
-}
-
-.eye-btn {
-  width: 30px;
-  height: 30px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  cursor: pointer;
-  flex: 0 0 auto;
-}
-
-.eye-btn:hover {
-  color: var(--primary);
-  background: var(--panel-soft);
-}
-
-.error-block {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
-  background: var(--danger-bg);
-  color: var(--danger);
-  border-radius: 8px;
-  padding: 12px 14px;
-  font-size: 13px;
-}
-
-.aux-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: -2px;
-}
-
-.aux-link {
-  color: var(--muted);
-  font-size: 13px;
-  text-decoration: none;
-}
-
-.aux-link:hover {
-  color: var(--primary);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.submit-btn {
-  width: 100%;
-  min-height: 50px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--primary);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  transition: transform 80ms ease, background 160ms ease, opacity 160ms ease;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background: var(--primary-strong);
-}
-
-.submit-btn:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.submit-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.58;
-}
-
-.icon-sm {
-  width: 16px;
-  height: 16px;
-}
-
-.spinner {
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@media (max-width: 520px) {
-  .login-page {
-    padding: 18px;
-  }
-
-  .theme-switch {
-    top: 16px;
-    right: 16px;
-  }
-
-  .login-title h1 {
-    font-size: 42px;
-  }
-
-  .login-card {
-    padding: 26px 20px;
-  }
-}
-</style>
+          <button type="submit" :disabled="loading"
+            class="w-full flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-colors">
+            <svg v-if="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            <span>{{ loading ? 'Verificando...' : 'Ingresar' }}</span>
+            <svg v-if="!loading" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>

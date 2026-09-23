@@ -8,7 +8,7 @@ import { registerSW } from 'virtual:pwa-register'
 registerSW({
   onNeedRefresh() {},
   onOfflineReady() {
-    console.info('Monitor Vial listo para uso sin conexión')
+    console.info('Coyuntura SGIC listo para uso sin conexión')
   },
 })
 

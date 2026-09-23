@@ -2,7 +2,7 @@ import os
 import shutil
 import uuid
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import List, Optional
 
 import bcrypt
 import jwt
@@ -25,10 +25,13 @@ from sqlalchemy import (
     Column,
     DateTime,
     Float,
+    ForeignKey,
     Integer,
     String,
     Text,
     create_engine,
+    inspect,
+    text,
 )
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -68,8 +71,8 @@ class User(Base):
     password = Column(String(255), nullable=False)
     role = Column(String(50), default="lector")
     terms_accepted_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 
 class Bloqueo(Base):
@@ -85,8 +88,43 @@ class Bloqueo(Base):
     foto_path = Column(String(512), nullable=True)
     latitud = Column(Float, nullable=False)
     longitud = Column(Float, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # ── Inicio del evento (matriz institucional) ──────────────────────
+    fecha_hora_inicio = Column(DateTime, nullable=True)
+    referencia_inicio = Column(String(512), nullable=True)
+    zona_inicio = Column(String(20), nullable=True)
+    comisaria_inicio = Column(String(100), nullable=True)
+    instrumentos = Column(Text, nullable=True)
+    nivel_conflicto = Column(String(20), nullable=True)
+    presencia_policial = Column(Text, nullable=True)
+    cantidad_vehiculos = Column(String(100), nullable=True)
+    demandas = Column(Text, nullable=True)
+    actores = Column(String(255), nullable=True)
+    lideres_vulnerables = Column(Text, nullable=True)
+
+    # ── Finalización del evento ────────────────────────────────────────
+    fecha_hora_fin = Column(DateTime, nullable=True)
+    direccion_fin = Column(String(255), nullable=True)
+    latitud_fin = Column(Float, nullable=True)
+    longitud_fin = Column(Float, nullable=True)
+    referencia_fin = Column(String(512), nullable=True)
+    departamento_fin = Column(String(255), nullable=True)
+    municipio_fin = Column(String(255), nullable=True)
+    zona_fin = Column(String(20), nullable=True)
+    comisaria_fin = Column(String(100), nullable=True)
+    personas_fin = Column(Integer, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class BloqueoFoto(Base):
+    __tablename__ = "bloqueo_fotos"
+    id = Column(Integer, primary_key=True, index=True)
+    bloqueo_id = Column(Integer, ForeignKey("bloqueos.id"), nullable=False, index=True)
+    path = Column(String(512), nullable=False)
+    orden = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.now)
 
 
 class TipoEvento(Base):
@@ -97,11 +135,27 @@ class TipoEvento(Base):
     color_light = Column(String(7), nullable=False)
     color_border = Column(String(7), nullable=False)
     icon_path = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 
 Base.metadata.create_all(bind=engine)
+
+
+def _migrar_columnas_faltantes():
+    """SQLite no agrega columnas nuevas a tablas existentes con create_all();
+    aquí se revisan y agregan las que falten al modelo actual."""
+    inspector = inspect(engine)
+    with engine.begin() as conn:
+        for tabla in Base.metadata.tables.values():
+            columnas_existentes = {c["name"] for c in inspector.get_columns(tabla.name)}
+            for columna in tabla.columns:
+                if columna.name not in columnas_existentes:
+                    tipo_sql = columna.type.compile(engine.dialect)
+                    conn.execute(text(f"ALTER TABLE {tabla.name} ADD COLUMN {columna.name} {tipo_sql}"))
+
+
+_migrar_columnas_faltantes()
 
 # ---------------------------------------------------------------------------
 # Seed data
@@ -164,7 +218,7 @@ def seed_database():
                 email="admin@admin.com",
                 password=hashed,
                 role="editor",
-                terms_accepted_at=datetime.utcnow(),
+                terms_accepted_at=datetime.now(),
             )
             db.add(admin)
 
@@ -173,6 +227,16 @@ def seed_database():
             if not db.query(TipoEvento).filter(TipoEvento.nombre == tipo["nombre"]).first():
                 db.add(TipoEvento(**tipo))
 
+        db.commit()
+
+        # Migrar fotos antiguas (columna foto_path) a la tabla bloqueo_fotos
+        migrated_ids = {row[0] for row in db.query(BloqueoFoto.bloqueo_id).distinct().all()}
+        for b in db.query(Bloqueo).filter(Bloqueo.foto_path.isnot(None)).all():
+            if b.id not in migrated_ids:
+                db.add(BloqueoFoto(bloqueo_id=b.id, path=b.foto_path, orden=0))
+
+        # Migrar terminología de estado: "Finalizado" -> "Inactivo"
+        db.query(Bloqueo).filter(Bloqueo.estado == "Finalizado").update({"estado": "Inactivo"})
         db.commit()
     finally:
         db.close()
@@ -184,7 +248,7 @@ seed_database()
 # App & CORS
 # ---------------------------------------------------------------------------
 
-app = FastAPI(title="Monitor Vial GT API")
+app = FastAPI(title="Coyuntura SGIC API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -368,7 +432,7 @@ def me(current_user: User = Depends(get_current_user)):
 @app.post("/api/auth/accept-terms")
 def accept_terms(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == current_user.id).first()
-    user.terms_accepted_at = datetime.utcnow()
+    user.terms_accepted_at = datetime.now()
     db.commit()
     token = create_token(user)
     return {"token": token, "message": "Términos aceptados"}
@@ -451,6 +515,36 @@ def create_tipo_evento(
     return tipo
 
 
+@app.patch("/api/tipos-evento/{tipo_id}", response_model=TipoEventoOut)
+def update_tipo_evento(
+    tipo_id: int,
+    nombre: str = Form(...),
+    color: str = Form(...),
+    color_light: str = Form(...),
+    color_border: str = Form(...),
+    icon_path: str = Form(...),
+    _: User = Depends(require_editor),
+    db: Session = Depends(get_db),
+):
+    tipo = db.query(TipoEvento).filter(TipoEvento.id == tipo_id).first()
+    if not tipo:
+        raise HTTPException(status_code=404, detail="Tipo no encontrado")
+    duplicado = db.query(TipoEvento).filter(TipoEvento.nombre == nombre, TipoEvento.id != tipo_id).first()
+    if duplicado:
+        raise HTTPException(status_code=422, detail="Ya existe un tipo con ese nombre")
+    nombre_anterior = tipo.nombre
+    tipo.nombre = nombre
+    tipo.color = color
+    tipo.color_light = color_light
+    tipo.color_border = color_border
+    tipo.icon_path = icon_path
+    if nombre_anterior != nombre:
+        db.query(Bloqueo).filter(Bloqueo.tipo_evento == nombre_anterior).update({Bloqueo.tipo_evento: nombre})
+    db.commit()
+    db.refresh(tipo)
+    return tipo
+
+
 @app.delete("/api/tipos-evento/{tipo_id}")
 def delete_tipo_evento(
     tipo_id: int,
@@ -470,7 +564,45 @@ def delete_tipo_evento(
 # ---------------------------------------------------------------------------
 
 
-def bloqueo_to_dict(b: Bloqueo) -> dict:
+MAX_FOTOS_POR_BLOQUEO = 8
+POR_ESTABLECER = "Por establecer"
+
+# Campos de "análisis" que en la matriz institucional se muestran como
+# "POR ESTABLECER" cuando todavía no se conocen en el momento del registro.
+CAMPOS_POR_ESTABLECER = (
+    "referencia_inicio",
+    "zona_inicio",
+    "comisaria_inicio",
+    "instrumentos",
+    "nivel_conflicto",
+    "presencia_policial",
+    "cantidad_vehiculos",
+    "demandas",
+    "actores",
+    "lideres_vulnerables",
+)
+
+
+def _formatear_duracion(inicio: Optional[datetime], fin: Optional[datetime]) -> Optional[str]:
+    if not inicio or not fin or fin < inicio:
+        return None
+    total_min = int((fin - inicio).total_seconds() // 60)
+    horas, minutos = divmod(total_min, 60)
+    if horas and minutos:
+        return f"{horas}h {minutos}min"
+    if horas:
+        return f"{horas}h"
+    return f"{minutos}min"
+
+
+def bloqueo_to_dict(b: Bloqueo, db: Session) -> dict:
+    fotos = (
+        db.query(BloqueoFoto)
+        .filter(BloqueoFoto.bloqueo_id == b.id)
+        .order_by(BloqueoFoto.orden, BloqueoFoto.id)
+        .all()
+    )
+    fotos_paths = [f.path for f in fotos]
     return {
         "id": b.id,
         "direccion": b.direccion,
@@ -480,18 +612,57 @@ def bloqueo_to_dict(b: Bloqueo) -> dict:
         "estado": b.estado,
         "manifestantes_aproximados": b.manifestantes_aproximados,
         "observaciones": b.observaciones,
-        "foto_path": b.foto_path,
+        "foto_path": fotos_paths[0] if fotos_paths else None,
+        "fotos": fotos_paths,
         "latitud": b.latitud,
         "longitud": b.longitud,
+        # Inicio
+        "fecha_hora_inicio": b.fecha_hora_inicio.isoformat() if b.fecha_hora_inicio else None,
+        "referencia_inicio": b.referencia_inicio,
+        "zona_inicio": b.zona_inicio,
+        "comisaria_inicio": b.comisaria_inicio,
+        "instrumentos": b.instrumentos,
+        "nivel_conflicto": b.nivel_conflicto,
+        "presencia_policial": b.presencia_policial,
+        "cantidad_vehiculos": b.cantidad_vehiculos,
+        "demandas": b.demandas,
+        "actores": b.actores,
+        "lideres_vulnerables": b.lideres_vulnerables,
+        # Finalización
+        "fecha_hora_fin": b.fecha_hora_fin.isoformat() if b.fecha_hora_fin else None,
+        "direccion_fin": b.direccion_fin,
+        "latitud_fin": b.latitud_fin,
+        "longitud_fin": b.longitud_fin,
+        "referencia_fin": b.referencia_fin,
+        "departamento_fin": b.departamento_fin,
+        "municipio_fin": b.municipio_fin,
+        "zona_fin": b.zona_fin,
+        "comisaria_fin": b.comisaria_fin,
+        "personas_fin": b.personas_fin,
+        "duracion": _formatear_duracion(b.fecha_hora_inicio, b.fecha_hora_fin),
         "created_at": b.created_at.isoformat() if b.created_at else None,
         "updated_at": b.updated_at.isoformat() if b.updated_at else None,
     }
 
 
+def _guardar_fotos(db: Session, bloqueo_id: int, fotos: List[UploadFile], orden_inicial: int = 0):
+    orden = orden_inicial
+    for foto in fotos:
+        if not foto or not foto.filename:
+            continue
+        ext = os.path.splitext(foto.filename)[1]
+        filename = f"{uuid.uuid4()}{ext}"
+        dest = os.path.join(STORAGE_PATH, filename)
+        with open(dest, "wb") as f:
+            shutil.copyfileobj(foto.file, f)
+        db.add(BloqueoFoto(bloqueo_id=bloqueo_id, path=f"/storage/{filename}", orden=orden))
+        orden += 1
+
+
 @app.get("/api/bloqueos")
 def list_bloqueos(db: Session = Depends(get_db)):
     bloqueos = db.query(Bloqueo).order_by(Bloqueo.created_at.desc()).all()
-    return [bloqueo_to_dict(b) for b in bloqueos]
+    return [bloqueo_to_dict(b, db) for b in bloqueos]
 
 
 @app.get("/api/bloqueos/{bloqueo_id}")
@@ -499,7 +670,7 @@ def get_bloqueo(bloqueo_id: int, db: Session = Depends(get_db)):
     b = db.query(Bloqueo).filter(Bloqueo.id == bloqueo_id).first()
     if not b:
         raise HTTPException(status_code=404, detail="Evento no encontrado")
-    return bloqueo_to_dict(b)
+    return bloqueo_to_dict(b, db)
 
 
 @app.post("/api/bloqueos", status_code=201)
@@ -513,18 +684,40 @@ def create_bloqueo(
     estado: str = Form("Activo"),
     manifestantes_aproximados: Optional[int] = Form(None),
     observaciones: Optional[str] = Form(None),
-    foto: Optional[UploadFile] = File(None),
+    fotos: List[UploadFile] = File(default=[]),
+    # Inicio (matriz institucional)
+    fecha_hora_inicio: Optional[datetime] = Form(None),
+    referencia_inicio: Optional[str] = Form(None),
+    zona_inicio: Optional[str] = Form(None),
+    comisaria_inicio: Optional[str] = Form(None),
+    instrumentos: Optional[str] = Form(None),
+    nivel_conflicto: Optional[str] = Form(None),
+    presencia_policial: Optional[str] = Form(None),
+    cantidad_vehiculos: Optional[str] = Form(None),
+    demandas: Optional[str] = Form(None),
+    actores: Optional[str] = Form(None),
+    lideres_vulnerables: Optional[str] = Form(None),
     _: User = Depends(require_editor),
     db: Session = Depends(get_db),
 ):
-    foto_path = None
-    if foto and foto.filename:
-        ext = os.path.splitext(foto.filename)[1]
-        filename = f"{uuid.uuid4()}{ext}"
-        dest = os.path.join(STORAGE_PATH, filename)
-        with open(dest, "wb") as f:
-            shutil.copyfileobj(foto.file, f)
-        foto_path = f"/storage/{filename}"
+    if len(fotos) > MAX_FOTOS_POR_BLOQUEO:
+        raise HTTPException(status_code=422, detail=f"Máximo {MAX_FOTOS_POR_BLOQUEO} fotos por evento")
+
+    valores_analisis = {
+        "referencia_inicio": referencia_inicio,
+        "zona_inicio": zona_inicio,
+        "comisaria_inicio": comisaria_inicio,
+        "instrumentos": instrumentos,
+        "nivel_conflicto": nivel_conflicto,
+        "presencia_policial": presencia_policial,
+        "cantidad_vehiculos": cantidad_vehiculos,
+        "demandas": demandas,
+        "actores": actores,
+        "lideres_vulnerables": lideres_vulnerables,
+    }
+    for campo in CAMPOS_POR_ESTABLECER:
+        if not valores_analisis[campo]:
+            valores_analisis[campo] = POR_ESTABLECER
 
     b = Bloqueo(
         direccion=direccion,
@@ -533,15 +726,20 @@ def create_bloqueo(
         tipo_evento=tipo_evento,
         latitud=latitud,
         longitud=longitud,
-        estado=estado if estado in ("Activo", "Finalizado") else "Activo",
+        estado=estado if estado in ("Activo", "Inactivo") else "Activo",
         manifestantes_aproximados=manifestantes_aproximados,
         observaciones=observaciones,
-        foto_path=foto_path,
+        fecha_hora_inicio=fecha_hora_inicio or datetime.now(),
+        **valores_analisis,
     )
     db.add(b)
     db.commit()
     db.refresh(b)
-    return bloqueo_to_dict(b)
+
+    _guardar_fotos(db, b.id, fotos)
+    db.commit()
+    db.refresh(b)
+    return bloqueo_to_dict(b, db)
 
 
 @app.patch("/api/bloqueos/{bloqueo_id}")
@@ -556,8 +754,31 @@ def update_bloqueo(
     estado: Optional[str] = Form(None),
     manifestantes_aproximados: Optional[int] = Form(None),
     observaciones: Optional[str] = Form(None),
-    foto: Optional[UploadFile] = File(None),
-    remove_foto: Optional[str] = Form(None),
+    fotos: List[UploadFile] = File(default=[]),
+    remove_fotos: List[str] = Form(default=[]),
+    # Inicio
+    fecha_hora_inicio: Optional[datetime] = Form(None),
+    referencia_inicio: Optional[str] = Form(None),
+    zona_inicio: Optional[str] = Form(None),
+    comisaria_inicio: Optional[str] = Form(None),
+    instrumentos: Optional[str] = Form(None),
+    nivel_conflicto: Optional[str] = Form(None),
+    presencia_policial: Optional[str] = Form(None),
+    cantidad_vehiculos: Optional[str] = Form(None),
+    demandas: Optional[str] = Form(None),
+    actores: Optional[str] = Form(None),
+    lideres_vulnerables: Optional[str] = Form(None),
+    # Finalización
+    fecha_hora_fin: Optional[datetime] = Form(None),
+    direccion_fin: Optional[str] = Form(None),
+    latitud_fin: Optional[float] = Form(None),
+    longitud_fin: Optional[float] = Form(None),
+    referencia_fin: Optional[str] = Form(None),
+    departamento_fin: Optional[str] = Form(None),
+    municipio_fin: Optional[str] = Form(None),
+    zona_fin: Optional[str] = Form(None),
+    comisaria_fin: Optional[str] = Form(None),
+    personas_fin: Optional[int] = Form(None),
     _: User = Depends(require_editor),
     db: Session = Depends(get_db),
 ):
@@ -577,35 +798,86 @@ def update_bloqueo(
         b.latitud = latitud
     if longitud is not None:
         b.longitud = longitud
-    if estado is not None and estado in ("Activo", "Finalizado"):
+    if estado is not None and estado in ("Activo", "Inactivo"):
         b.estado = estado
     if manifestantes_aproximados is not None:
         b.manifestantes_aproximados = manifestantes_aproximados
     if observaciones is not None:
         b.observaciones = observaciones
 
-    if remove_foto == "true" and b.foto_path:
-        filepath = os.path.join(STORAGE_PATH, os.path.basename(b.foto_path))
-        if os.path.exists(filepath):
-            os.remove(filepath)
-        b.foto_path = None
+    if fecha_hora_inicio is not None:
+        b.fecha_hora_inicio = fecha_hora_inicio
+    if referencia_inicio is not None:
+        b.referencia_inicio = referencia_inicio
+    if zona_inicio is not None:
+        b.zona_inicio = zona_inicio
+    if comisaria_inicio is not None:
+        b.comisaria_inicio = comisaria_inicio
+    if instrumentos is not None:
+        b.instrumentos = instrumentos
+    if nivel_conflicto is not None:
+        b.nivel_conflicto = nivel_conflicto
+    if presencia_policial is not None:
+        b.presencia_policial = presencia_policial
+    if cantidad_vehiculos is not None:
+        b.cantidad_vehiculos = cantidad_vehiculos
+    if demandas is not None:
+        b.demandas = demandas
+    if actores is not None:
+        b.actores = actores
+    if lideres_vulnerables is not None:
+        b.lideres_vulnerables = lideres_vulnerables
 
-    if foto and foto.filename:
-        if b.foto_path:
-            old_path = os.path.join(STORAGE_PATH, os.path.basename(b.foto_path))
-            if os.path.exists(old_path):
-                os.remove(old_path)
-        ext = os.path.splitext(foto.filename)[1]
-        filename = f"{uuid.uuid4()}{ext}"
-        dest = os.path.join(STORAGE_PATH, filename)
-        with open(dest, "wb") as f:
-            shutil.copyfileobj(foto.file, f)
-        b.foto_path = f"/storage/{filename}"
+    if fecha_hora_fin is not None:
+        b.fecha_hora_fin = fecha_hora_fin
+    if direccion_fin is not None:
+        b.direccion_fin = direccion_fin
+    if latitud_fin is not None:
+        b.latitud_fin = latitud_fin
+    if longitud_fin is not None:
+        b.longitud_fin = longitud_fin
+    if referencia_fin is not None:
+        b.referencia_fin = referencia_fin
+    if departamento_fin is not None:
+        b.departamento_fin = departamento_fin
+    if municipio_fin is not None:
+        b.municipio_fin = municipio_fin
+    if zona_fin is not None:
+        b.zona_fin = zona_fin
+    if comisaria_fin is not None:
+        b.comisaria_fin = comisaria_fin
+    if personas_fin is not None:
+        b.personas_fin = personas_fin
 
-    b.updated_at = datetime.utcnow()
+    # Al marcar el evento como Inactivo, si no se indicó fecha/hora de fin, se registra automáticamente
+    if estado == "Inactivo" and b.fecha_hora_fin is None and fecha_hora_fin is None:
+        b.fecha_hora_fin = datetime.now()
+
+    if remove_fotos:
+        a_eliminar = (
+            db.query(BloqueoFoto)
+            .filter(BloqueoFoto.bloqueo_id == b.id, BloqueoFoto.path.in_(remove_fotos))
+            .all()
+        )
+        for foto in a_eliminar:
+            filepath = os.path.join(STORAGE_PATH, os.path.basename(foto.path))
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            db.delete(foto)
+
+    if fotos:
+        restantes = db.query(BloqueoFoto).filter(BloqueoFoto.bloqueo_id == b.id).count()
+        if remove_fotos:
+            restantes -= len(remove_fotos)
+        if restantes + len(fotos) > MAX_FOTOS_POR_BLOQUEO:
+            raise HTTPException(status_code=422, detail=f"Máximo {MAX_FOTOS_POR_BLOQUEO} fotos por evento")
+        siguiente_orden = db.query(BloqueoFoto).filter(BloqueoFoto.bloqueo_id == b.id).count() + 1000
+        _guardar_fotos(db, b.id, fotos, orden_inicial=siguiente_orden)
+
+    b.updated_at = datetime.now()
     db.commit()
     db.refresh(b)
-    return bloqueo_to_dict(b)
+    return bloqueo_to_dict(b, db)
 
 
 @app.delete("/api/bloqueos/{bloqueo_id}")
@@ -617,6 +889,12 @@ def delete_bloqueo(
     b = db.query(Bloqueo).filter(Bloqueo.id == bloqueo_id).first()
     if not b:
         raise HTTPException(status_code=404, detail="Evento no encontrado")
+    fotos = db.query(BloqueoFoto).filter(BloqueoFoto.bloqueo_id == b.id).all()
+    for foto in fotos:
+        filepath = os.path.join(STORAGE_PATH, os.path.basename(foto.path))
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        db.delete(foto)
     if b.foto_path:
         filepath = os.path.join(STORAGE_PATH, os.path.basename(b.foto_path))
         if os.path.exists(filepath):
@@ -694,6 +972,25 @@ def update_user_role(
     return {"message": "Rol actualizado", "role": user.role}
 
 
+@app.patch("/api/usuarios/{user_id}/email")
+def update_user_email(
+    user_id: int,
+    email: str = Form(...),
+    current_user: User = Depends(require_editor),
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    duplicado = db.query(User).filter(User.email == email, User.id != user_id).first()
+    if duplicado:
+        raise HTTPException(status_code=422, detail="Ya existe una cuenta con ese correo")
+    user.email = email
+    user.updated_at = datetime.now()
+    db.commit()
+    return {"message": "Correo actualizado", "email": user.email}
+
+
 @app.patch("/api/usuarios/{user_id}/password")
 def reset_user_password(
     user_id: int,
@@ -707,7 +1004,7 @@ def reset_user_password(
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     user.password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
-    user.updated_at = datetime.utcnow()
+    user.updated_at = datetime.now()
     db.commit()
     return {"message": "Contraseña restablecida"}
 

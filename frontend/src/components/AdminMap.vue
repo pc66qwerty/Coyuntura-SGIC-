@@ -7,6 +7,15 @@
       style="background:var(--surface);border-color:var(--border);color:var(--t2)">
       {{ darkTile ? '🌙 Oscuro' : '☀️ Claro' }}
     </button>
+    <!-- Centrar mapa -->
+    <button @click="recenterMap" title="Centrar mapa"
+      class="absolute bottom-3 right-3 z-[1000] w-8 h-8 rounded-lg flex items-center justify-center transition-colors border"
+      style="background:var(--surface);border-color:var(--border);color:var(--t2)">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+      </svg>
+    </button>
     <div v-if="pickMode" class="absolute inset-0 z-[900] pointer-events-none">
       <div class="absolute top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-xs font-medium shadow-lg text-white"
         style="background:var(--accent)">
@@ -69,13 +78,19 @@ function renderMarkers(list) {
       iconSize: [32, 32],
       iconAnchor: [16, 16],
     })
+    const fotos = (b.fotos && b.fotos.length ? b.fotos : (b.foto_path ? [b.foto_path] : []))
+    const fotosHtml = fotos.length
+      ? `<div style="display:flex;gap:4px;margin-top:6px;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:4px;">
+          ${fotos.map((f) => `<img src="${f}" style="width:100%;flex:0 0 100%;scroll-snap-align:start;max-height:100px;object-fit:cover;border-radius:4px;" />`).join('')}
+        </div>${fotos.length > 1 ? `<div style="text-align:center;font-size:9px;color:#6b7280;margin-top:2px;">◂ deslizar · ${fotos.length} fotos ▸</div>` : ''}`
+      : ''
     const popup = `
       <div style="font-size:12px;color:#e5e7eb;min-width:180px;">
         <strong style="color:#fff">${b.tipo_evento}</strong>
         <span style="margin-left:6px;padding:1px 6px;border-radius:9999px;font-size:10px;background:${b.estado === 'Activo' ? '#7f1d1d' : '#14532d'};color:${b.estado === 'Activo' ? '#fca5a5' : '#86efac'}">${b.estado}</span>
         <br/><span style="color:#9ca3af">${b.municipio}, ${b.departamento}</span>
         <br/><span style="color:#9ca3af">${b.direccion}</span>
-        ${b.foto_path ? `<br/><img src="${b.foto_path}" style="width:100%;margin-top:6px;border-radius:4px;max-height:100px;object-fit:cover" />` : ''}
+        ${fotosHtml}
       </div>
     `
     if (markers[b.id]) {
@@ -91,6 +106,13 @@ function renderMarkers(list) {
 
 function focusOn(lat, lng, zoom = 14) {
   if (map) map.setView([lat, lng], zoom)
+}
+
+const DEFAULT_CENTER = [14.6349, -90.5069]
+const DEFAULT_ZOOM = 7
+
+function recenterMap() {
+  if (map) map.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM, { animate: true, duration: 1 })
 }
 
 function clearTempMarker() {

@@ -11,7 +11,6 @@ const routes = [
   { path: '/usuarios',       component: () => import('@/views/Users.vue'),              meta: { requiresAuth: true, requiresTerms: true, requiresEditor: true } },
   { path: '/tipos-evento',   component: () => import('@/views/TiposEvento.vue'),        meta: { requiresAuth: true, requiresTerms: true, requiresEditor: true } },
   { path: '/ayuda',          component: () => import('@/views/Ayuda.vue'),              meta: { requiresAuth: true, requiresTerms: true } },
-  { path: '/perfil',         component: () => import('@/views/profile/Edit.vue'),       meta: { requiresAuth: true, requiresTerms: true } },
   { path: '/:pathMatch(.*)*',redirect: '/' },
 ]
 
