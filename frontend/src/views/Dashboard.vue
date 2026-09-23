@@ -971,7 +971,7 @@ onUnmounted(() => { if (pollInterval) clearInterval(pollInterval) })
               <div class="h-[min(66vh,680px)] min-h-[520px] rounded-xl overflow-hidden">
                 <AdminMap
                   ref="adminMapRef"
-                  :bloqueos="bloqueos"
+                  :bloqueos="filteredList"
                   :pick-mode="pickMode"
                   @coords-selected="onCoordsSelected"
                 />
