@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import uuid
@@ -228,6 +229,21 @@ def seed_database():
                 db.add(TipoEvento(**tipo))
 
         db.commit()
+
+        # Eventos de ejemplo (matriz institucional real) — solo en una base de datos vacía,
+        # para que cualquiera que clone el repo arranque con los mismos datos de referencia.
+        if not db.query(Bloqueo).first():
+            matriz_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "seed_data", "bloqueos_matriz.json")
+            if os.path.exists(matriz_path):
+                with open(matriz_path, encoding="utf-8") as f:
+                    eventos_seed = json.load(f)
+                for ev in eventos_seed:
+                    ev = dict(ev)
+                    for campo in ("fecha_hora_inicio", "fecha_hora_fin"):
+                        if ev.get(campo):
+                            ev[campo] = datetime.fromisoformat(ev[campo])
+                    db.add(Bloqueo(**ev))
+                db.commit()
 
         # Migrar fotos antiguas (columna foto_path) a la tabla bloqueo_fotos
         migrated_ids = {row[0] for row in db.query(BloqueoFoto.bloqueo_id).distinct().all()}
