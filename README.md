@@ -76,7 +76,7 @@ Por defecto no necesitas cambiar nada para desarrollo local. Si quieres, puedes 
 python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-- La primera vez que corre, crea automáticamente la base de datos SQLite en `backend/data/monitorvial.db`, las tablas, los tipos de evento por defecto y un usuario administrador.
+- La primera vez que corre, crea automáticamente la base de datos SQLite en `backend/data/monitorvial.db`, las tablas, los tipos de evento por defecto, un usuario administrador **y 28 eventos reales de referencia** (la matriz institucional con la que se probó el sistema). Esta base de datos vive solo en tu máquina (no se sube a git), así que cada quien tiene su propia copia para experimentar sin afectar a los demás.
 - Déjalo corriendo en esta terminal. La API queda disponible en **http://localhost:8000** (documentación interactiva en `http://localhost:8000/docs`).
 
 **Usuario administrador por defecto** (se crea solo, en el primer arranque):
