@@ -516,6 +516,9 @@ async function printReport() {
   try {
     const list = filteredList.value
     const logoUrl = window.location.origin + '/logo-sgic.png'
+    const sgicLogoUrl = window.location.origin + '/SGIC.png'
+    const cradicLogoUrl = window.location.origin + '/CRADIC.png'
+    const sesicLogoUrl = window.location.origin + '/SESIC.png'
     const ahora = new Date()
     const fechaLarga = ahora.toLocaleDateString('es-GT', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
     const fechaTit = ahora.toLocaleDateString('es-GT', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')
@@ -655,10 +658,8 @@ async function printReport() {
         tr:last-child td { border-bottom: none; }
         tr:nth-child(even) td { background: #f9fafb; }
         .footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb; }
-        .footer-cradic { display: flex; align-items: center; gap: 6px; }
-        .footer-cradic .dot { width: 6px; height: 6px; background: #dc2626; border-radius: 50%; }
-        .footer-cradic span { font-size: 8px; color: #9ca3af; }
-        .footer-cradic strong { color: #6b7280; }
+        .footer-logos { display: flex; align-items: center; gap: 10px; }
+        .footer-logos img { height: 16px; width: auto; object-fit: contain; opacity: .85; }
         .footer-total { background: #dc2626; color: white; font-size: 10px; font-weight: 800; padding: 5px 14px; border-radius: 3px; text-transform: uppercase; letter-spacing: .06em; }
         .footer-page { font-size: 8px; color: #d1d5db; font-family: monospace; }
         @media print { body, .stat, thead tr, td { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
@@ -707,9 +708,10 @@ async function printReport() {
         </div>
       </div>
       <div class="footer">
-        <div class="footer-cradic">
-          <div class="dot"></div>
-          <span><strong>Seccion de Sistemas de Informacion Criminal</strong> &nbsp;|&nbsp; CRADIC &nbsp;|&nbsp; Coyuntura SGIC</span>
+        <div class="footer-logos">
+          <img src="${sgicLogoUrl}" alt="SGIC" />
+          <img src="${cradicLogoUrl}" alt="CRADIC" />
+          <img src="${sesicLogoUrl}" alt="SESIC" />
         </div>
         ${totalPersonas > 0 ? `<div class="footer-total">${totalPersonas.toLocaleString('es-GT')} personas aproximadas</div>` : ''}
         <div class="footer-page">Documento generado el ${fechaTit} a las ${horaStr}</div>
