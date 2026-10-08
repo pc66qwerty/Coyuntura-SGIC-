@@ -535,10 +535,17 @@ async function printReport() {
     try {
       const mapEl = adminMapRef.value?.mapEl?.value || adminMapRef.value?.mapEl
       if (mapEl) {
+        // Espera a que las teselas terminen de cargar (red lenta, caché vacía) y a que
+        // el navegador pinte, para que la captura no salga en blanco.
+        await adminMapRef.value?.waitForTilesLoaded?.()
+        await new Promise(requestAnimationFrame)
+        await new Promise(requestAnimationFrame)
         const canvas = await html2canvas(mapEl, { useCORS: true, allowTaint: false, scale: 1.5, logging: false })
         mapImgTag = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;height:220px;object-fit:cover;display:block;" alt="Mapa vial Guatemala"/>`
       }
-    } catch { /* sin mapa */ }
+    } catch (e) {
+      showToast('No se pudo capturar la imagen del mapa para el PDF (el reporte se generó sin ella)', 'warning')
+    }
 
     const colorEstado = (e) => (e === 'Activo' ? '#dc2626' : '#16a34a')
     const colorNivel = (n) => {

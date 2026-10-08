@@ -55,7 +55,7 @@ function toggleTileTheme() {
   localStorage.setItem('mapTheme', darkTile.value ? 'dark' : 'light')
   if (map && tileLayer) {
     map.removeLayer(tileLayer)
-    tileLayer = L.tileLayer(darkTile.value ? DARK_TILE : LIGHT_TILE, { maxZoom: 19, attribution: '' })
+    tileLayer = L.tileLayer(darkTile.value ? DARK_TILE : LIGHT_TILE, { maxZoom: 19, attribution: '', crossOrigin: true })
     tileLayer.addTo(map)
   }
 }
@@ -122,7 +122,18 @@ function clearTempMarker() {
   }
 }
 
-defineExpose({ focusOn, clearTempMarker, mapEl })
+// Espera a que las teselas visibles del mapa terminen de cargar (con límite de tiempo),
+// para que una captura con html2canvas no quede en blanco por teselas aún no pintadas.
+function waitForTilesLoaded(timeoutMs = 4000) {
+  return new Promise((resolve) => {
+    if (!tileLayer || !tileLayer.isLoading()) { resolve(); return }
+    const timeout = setTimeout(() => { tileLayer.off('load', onLoad); resolve() }, timeoutMs)
+    function onLoad() { clearTimeout(timeout); resolve() }
+    tileLayer.once('load', onLoad)
+  })
+}
+
+defineExpose({ focusOn, clearTempMarker, mapEl, waitForTilesLoaded })
 
 onMounted(async () => {
   await load()
@@ -132,7 +143,7 @@ onMounted(async () => {
     zoomControl: false,
   })
   L.control.zoom({ position: 'bottomleft' }).addTo(map)
-  tileLayer = L.tileLayer(darkTile.value ? DARK_TILE : LIGHT_TILE, { maxZoom: 19, attribution: '' })
+  tileLayer = L.tileLayer(darkTile.value ? DARK_TILE : LIGHT_TILE, { maxZoom: 19, attribution: '', crossOrigin: true })
   tileLayer.addTo(map)
 
   map.on('click', (e) => {
