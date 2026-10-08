@@ -29,6 +29,8 @@ const toasts = ref([])
 const lastUpdated = ref(null)
 const listSearch = ref('')
 const listEstado = ref('Todos')
+const listTipo = ref('Todos')
+const listDepto = ref('Todos')
 const dateFrom = ref('')
 const dateTo = ref('')
 const printLoading = ref(false)
@@ -74,9 +76,16 @@ const filteredList = computed(() => {
     list = list.filter((b) => [b.tipo_evento, b.municipio, b.departamento, b.direccion].some((v) => v?.toLowerCase().includes(q)))
   }
   if (listEstado.value !== 'Todos') list = list.filter((b) => b.estado === listEstado.value)
+  if (listTipo.value !== 'Todos') list = list.filter((b) => b.tipo_evento === listTipo.value)
+  if (listDepto.value !== 'Todos') list = list.filter((b) => b.departamento === listDepto.value)
   if (dateFrom.value) list = list.filter((b) => new Date(b.created_at) >= new Date(dateFrom.value))
   if (dateTo.value) list = list.filter((b) => new Date(b.created_at) <= new Date(`${dateTo.value}T23:59:59`))
   return list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+})
+
+const deptosDisponibles = computed(() => {
+  const set = new Set(bloqueos.value.map((b) => b.departamento).filter(Boolean))
+  return ['Todos', ...Array.from(set).sort()]
 })
 
 const totalPages = computed(() => Math.max(1, Math.ceil(filteredList.value.length / PAGE_SIZE)))
@@ -87,7 +96,7 @@ const pagedList = computed(() => {
 function goToPage(p) {
   currentPage.value = Math.max(1, Math.min(p, totalPages.value))
 }
-watch([listSearch, listEstado, dateFrom, dateTo], () => { currentPage.value = 1 })
+watch([listSearch, listEstado, listTipo, listDepto, dateFrom, dateTo], () => { currentPage.value = 1 })
 
 function showToast(msg, type = 'success') {
   const id = ++toastId
@@ -353,8 +362,19 @@ async function exportExcel() {
 
     // Fila 2: subtítulo con fecha de generación e instituciones
     ws.mergeCells(2, 1, 2, totalCols)
+    const exportList = filteredList.value
+    const filtrosActivos = [
+      listEstado.value !== 'Todos' ? `Estado: ${listEstado.value}` : '',
+      listTipo.value !== 'Todos' ? `Tipo: ${listTipo.value}` : '',
+      listDepto.value !== 'Todos' ? `Departamento: ${listDepto.value}` : '',
+      dateFrom.value ? `Desde: ${dateFrom.value}` : '',
+      dateTo.value ? `Hasta: ${dateTo.value}` : '',
+      listSearch.value ? `Búsqueda: "${listSearch.value}"` : '',
+    ].filter(Boolean)
+    const sufijoFiltros = filtrosActivos.length ? `   —   Filtros: ${filtrosActivos.join(' · ')}` : ''
+
     const subtitleCell = ws.getCell(2, 1)
-    subtitleCell.value = `CRADIC · SGIC · SESIC   —   Generado el ${fechaLarga.charAt(0).toUpperCase() + fechaLarga.slice(1)} a las ${horaStr} horas   —   ${bloqueos.value.length} evento${bloqueos.value.length !== 1 ? 's' : ''} registrado${bloqueos.value.length !== 1 ? 's' : ''}`
+    subtitleCell.value = `CRADIC · SGIC · SESIC   —   Generado el ${fechaLarga.charAt(0).toUpperCase() + fechaLarga.slice(1)} a las ${horaStr} horas   —   ${exportList.length} evento${exportList.length !== 1 ? 's' : ''} exportado${exportList.length !== 1 ? 's' : ''}${sufijoFiltros}`
     subtitleCell.font = { italic: true, size: 9, color: { argb: 'FF6B7280' } }
     subtitleCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 }
     subtitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } }
@@ -374,7 +394,7 @@ async function exportExcel() {
     ws.autoFilter = { from: { row: 3, column: 1 }, to: { row: 3, column: totalCols } }
 
     // Filas de datos
-    bloqueos.value.forEach((b, i) => {
+    exportList.forEach((b, i) => {
       const inicio = splitFechaHora(b.fecha_hora_inicio || b.created_at)
       const fin = splitFechaHora(b.fecha_hora_fin)
       const row = ws.addRow({
@@ -444,7 +464,8 @@ async function exportExcel() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `matriz_eventos_${new Date().toISOString().slice(0, 10)}.xlsx`
+    const sufijoArchivo = filtrosActivos.length ? '_filtrado' : ''
+    a.download = `matriz_eventos_${new Date().toISOString().slice(0, 10)}${sufijoArchivo}.xlsx`
     a.click()
     URL.revokeObjectURL(url)
   } finally {
@@ -714,6 +735,7 @@ onUnmounted(() => { if (pollInterval) clearInterval(pollInterval) })
             Tipos
           </router-link>
           <button @click="exportExcel" :disabled="excelLoading"
+            :title="filteredList.length !== bloqueos.length ? `Exporta los ${filteredList.length} eventos filtrados en 'Eventos Registrados' (de ${bloqueos.length} en total)` : `Exporta los ${bloqueos.length} eventos`"
             class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:border-green-500 hover:text-green-600 dark:hover:text-green-400 shadow-sm transition disabled:opacity-50">
             <svg v-if="!excelLoading" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -723,6 +745,7 @@ onUnmounted(() => { if (pollInterval) clearInterval(pollInterval) })
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
             </svg>
             <span class="hidden sm:inline">Exportar</span> Excel
+            <span v-if="filteredList.length !== bloqueos.length" class="text-green-600 dark:text-green-400">({{ filteredList.length }})</span>
           </button>
           <button @click="printReport" :disabled="printLoading"
             class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 shadow-sm transition disabled:opacity-50">
@@ -893,6 +916,22 @@ onUnmounted(() => { if (pollInterval) clearInterval(pollInterval) })
                   {{ opt }}
                 </button>
               </div>
+            </div>
+            <!-- Filtro de tipo / departamento -->
+            <div class="flex items-center gap-2 flex-wrap">
+              <select v-model="listTipo"
+                class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg px-2 py-1.5 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-indigo-400 transition shadow-sm cursor-pointer">
+                <option value="Todos">Todos los tipos</option>
+                <option v-for="t in tipos" :key="t.nombre" :value="t.nombre">{{ t.nombre }}</option>
+              </select>
+              <select v-model="listDepto"
+                class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg px-2 py-1.5 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-indigo-400 transition shadow-sm cursor-pointer">
+                <option v-for="d in deptosDisponibles" :key="d" :value="d">
+                  {{ d === 'Todos' ? 'Todos los dptos.' : d }}
+                </option>
+              </select>
+              <button v-if="listTipo !== 'Todos' || listDepto !== 'Todos'" @click="listTipo = 'Todos'; listDepto = 'Todos'"
+                class="text-xs text-gray-400 hover:text-red-500 transition px-1">✕ Limpiar</button>
             </div>
             <!-- Filtro de fechas -->
             <div class="flex items-center gap-2 flex-wrap">
