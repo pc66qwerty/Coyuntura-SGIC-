@@ -351,18 +351,18 @@ const scrollToStats = () => {
 
     <!-- ═══ HEADER ════════════════════════════════════════════════ -->
     <header class="fixed top-0 left-0 right-0 z-[2000] bg-white/90 dark:bg-gray-950/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <div class="max-w-[1400px] mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2">
         <!-- Logo -->
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 min-w-0">
           <img src="/logo-sgic.png" alt="Coyuntura SGIC" class="w-9 h-9 object-contain flex-shrink-0" />
-          <div>
-            <span class="font-black text-gray-900 dark:text-white text-base tracking-tight">Coyuntura SGIC</span>
+          <div class="min-w-0">
+            <span class="font-black text-gray-900 dark:text-white text-sm sm:text-base tracking-tight truncate block">Coyuntura SGIC</span>
             <span class="hidden sm:inline text-gray-400 dark:text-gray-500 text-xs ml-2">Guatemala</span>
           </div>
         </div>
 
         <!-- Indicador en vivo + nav -->
-        <div class="flex items-center gap-2 sm:gap-4">
+        <div class="flex items-center gap-1.5 sm:gap-4 overflow-x-auto scrollbar-hide">
           <div class="hidden sm:flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1.5">
             <span class="relative flex h-2 w-2">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -373,7 +373,7 @@ const scrollToStats = () => {
 
           <!-- Toggle mapa (tiles) -->
           <button @click="toggleTheme"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 flex-shrink-0">
             <svg v-if="mapDark" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
@@ -385,7 +385,7 @@ const scrollToStats = () => {
 
           <!-- Toggle UI theme -->
           <button @click="toggleUITheme"
-            class="p-1.5 rounded-full border transition-all bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+            class="p-1.5 rounded-full border transition-all bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 flex-shrink-0"
             :title="theme === 'dark' ? 'Modo claro' : 'Modo oscuro'">
             <svg v-if="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -397,25 +397,30 @@ const scrollToStats = () => {
 
           <!-- Ayuda -->
           <router-link to="/ayuda" title="Ayuda"
-            class="p-1.5 rounded-full border transition-all bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
+            class="p-1.5 rounded-full border transition-all bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
             </svg>
           </router-link>
 
           <!-- Panel: solo editores -->
-          <router-link v-if="auth.isEditor" to="/dashboard"
-            class="text-xs font-semibold px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">
-            Panel
+          <router-link v-if="auth.isEditor" to="/dashboard" title="Panel"
+            class="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-xs font-semibold border transition-all bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/>
+            </svg>
+            <span class="hidden sm:inline">Panel</span>
           </router-link>
-          <div class="flex items-center gap-2 pl-2 border-l border-gray-200 dark:border-gray-700">
-            <div class="w-7 h-7 bg-indigo-600 rounded-full flex items-center justify-center text-xs font-black text-white">
+          <div class="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-gray-200 dark:border-gray-700 flex-shrink-0">
+            <div class="w-7 h-7 bg-indigo-600 rounded-full flex items-center justify-center text-xs font-black text-white flex-shrink-0">
               {{ auth.user?.name?.charAt(0).toUpperCase() }}
             </div>
-            <span class="hidden sm:block text-xs text-gray-600 dark:text-gray-300 font-medium">{{ auth.user?.name }}</span>
-            <button @click="logout"
-              class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-400 transition ml-1">
-              Salir
+            <span class="hidden md:block text-xs text-gray-600 dark:text-gray-300 font-medium max-w-[100px] truncate">{{ auth.user?.name }}</span>
+            <button @click="logout" title="Salir"
+              class="p-1.5 rounded-full text-gray-400 dark:text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -530,7 +535,7 @@ const scrollToStats = () => {
           class="absolute top-24 right-4 z-[600] w-72 sm:w-80"
           @click.stop>
           <div @click="detailBloqueo = selectedBloqueo; clearTimeout(selectedTimeout)"
-            class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl overflow-hidden cursor-pointer hover:ring-2 hover:ring-indigo-400 dark:hover:ring-indigo-500 transition">
+            class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl overflow-x-hidden overflow-y-auto max-h-[calc(52vh-7rem)] sm:max-h-[70vh] cursor-pointer hover:ring-2 hover:ring-indigo-400 dark:hover:ring-indigo-500 transition">
             <!-- Franja de color del tipo -->
             <div class="h-1 w-full" :style="`background:${getTipo(selectedBloqueo.tipo_evento).color}`"></div>
             <div class="p-4">
