@@ -461,8 +461,7 @@ const scrollToStats = () => {
 
       <!-- Indicador para deslizar hacia las estadísticas -->
       <button @click="scrollToStats" title="Ver estadísticas"
-        class="absolute bottom-6 sm:bottom-40 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center gap-0.5 px-4 py-2 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur border border-gray-200 dark:border-gray-700 shadow-lg text-gray-600 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-900 transition animate-bounce">
-        <span class="text-[10px] font-bold uppercase tracking-wider">Ver estadísticas</span>
+        class="absolute bottom-6 sm:bottom-36 left-1/2 -translate-x-1/2 z-[500] w-9 h-9 flex items-center justify-center rounded-full bg-white/40 dark:bg-gray-900/40 backdrop-blur-sm border border-white/40 dark:border-gray-600/40 shadow-sm text-gray-500 dark:text-gray-400 hover:bg-white/80 dark:hover:bg-gray-900/80 hover:text-indigo-500 dark:hover:text-indigo-400 transition animate-bounce">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
         </svg>
@@ -611,13 +610,6 @@ const scrollToStats = () => {
         </div>
       </transition>
 
-      <!-- Hint scroll -->
-      <div class="absolute bottom-32 left-1/2 -translate-x-1/2 z-[500] animate-bounce pointer-events-none hidden sm:flex flex-col items-center gap-1">
-        <span class="text-xs text-gray-400 dark:text-gray-500">Desplaza para más información</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-        </svg>
-      </div>
     </section>
 
     <!-- ═══ STATS MÓVIL (debajo del mapa, solo sm-) ══════════════ -->
