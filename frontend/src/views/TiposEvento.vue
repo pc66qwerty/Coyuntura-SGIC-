@@ -35,6 +35,59 @@ const iconOptions = [
 
 const BUILTIN = ['Emergencia', 'Accidente vial', 'Bloqueo', 'Asistencia vial', 'Trabajos', 'Libre']
 
+// ─── Ícono personalizado (SVG propio) ────────────────────────────────────
+const customIconD = ref('')
+const customIconError = ref('')
+
+function onCustomIconFile(e) {
+  const file = e.target.files?.[0]
+  e.target.value = ''
+  if (!file) return
+  customIconError.value = ''
+
+  if (!file.name.toLowerCase().endsWith('.svg') && file.type !== 'image/svg+xml') {
+    customIconError.value = 'El archivo debe ser un SVG (.svg)'
+    return
+  }
+  if (file.size > 100 * 1024) {
+    customIconError.value = 'El archivo es muy grande (máx. 100 KB)'
+    return
+  }
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    try {
+      const doc = new DOMParser().parseFromString(String(reader.result), 'image/svg+xml')
+      if (doc.querySelector('parsererror')) throw new Error('SVG inválido')
+
+      const paths = Array.from(doc.querySelectorAll('path'))
+        .map((p) => p.getAttribute('d'))
+        .filter(Boolean)
+      if (!paths.length) throw new Error('No se encontró ningún <path> en el SVG')
+
+      const svgEl = doc.querySelector('svg')
+      const viewBox = svgEl?.getAttribute('viewBox') || ''
+      if (viewBox && viewBox.trim() !== '0 0 24 24') {
+        customIconError.value = 'Ícono cargado. Nota: para mejor resultado usa un SVG con viewBox "0 0 24 24"'
+      }
+
+      const d = paths.join(' ')
+      customIconD.value = d
+      form.value.icon_path = d
+    } catch (err) {
+      customIconError.value = err.message || 'No se pudo leer el ícono'
+    }
+  }
+  reader.onerror = () => { customIconError.value = 'No se pudo leer el archivo' }
+  reader.readAsText(file)
+}
+
+function clearCustomIcon() {
+  if (form.value.icon_path === customIconD.value) form.value.icon_path = ''
+  customIconD.value = ''
+  customIconError.value = ''
+}
+
 function makeLight(hex) {
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
@@ -80,19 +133,27 @@ function openCreate() {
   editingTipo.value = null
   form.value = { nombre: '', color: '#2563EB', icon_path: '' }
   formError.value = ''
+  customIconD.value = ''
+  customIconError.value = ''
   showForm.value = true
 }
 
 function openEdit(t) {
   editingTipo.value = t
-  form.value = { nombre: t.nombre, color: t.color, icon_path: extractD(t.icon_path) }
+  const d = extractD(t.icon_path)
+  form.value = { nombre: t.nombre, color: t.color, icon_path: d }
   formError.value = ''
+  customIconError.value = ''
+  // Si el ícono guardado no está entre las opciones predefinidas, es un ícono propio: mostrarlo como tal.
+  customIconD.value = iconOptions.some((opt) => opt.d === d) ? '' : d
   showForm.value = true
 }
 
 function closeForm() {
   showForm.value = false
   editingTipo.value = null
+  customIconD.value = ''
+  customIconError.value = ''
 }
 
 async function saveTipo() {
@@ -224,7 +285,37 @@ onMounted(fetchTipos)
                     <path stroke-linecap="round" stroke-linejoin="round" :d="icon.d" />
                   </svg>
                 </button>
+
+                <!-- Ícono propio cargado -->
+                <button v-if="customIconD" type="button"
+                  @click="form.icon_path = customIconD"
+                  class="relative w-10 h-10 rounded-lg border flex items-center justify-center transition-all"
+                  :class="form.icon_path === customIconD
+                    ? 'bg-indigo-600 border-indigo-600'
+                    : 'bg-white dark:bg-[#131314] border-[#E2E8F0] dark:border-[#2A2A2A]'"
+                  title="Mi ícono">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                    :class="form.icon_path === customIconD ? 'stroke-white' : 'stroke-gray-500 dark:stroke-gray-400'">
+                    <path stroke-linecap="round" stroke-linejoin="round" :d="customIconD" />
+                  </svg>
+                  <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-gray-500 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
+                    @click.stop="clearCustomIcon">
+                    <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                  </span>
+                </button>
+
+                <!-- Subir ícono propio -->
+                <label title="Subir ícono SVG propio"
+                  class="w-10 h-10 rounded-lg border border-dashed flex items-center justify-center cursor-pointer transition-all bg-white dark:bg-[#131314] border-[#E2E8F0] dark:border-[#2A2A2A] text-gray-400 dark:text-gray-500 hover:border-indigo-400 hover:text-indigo-500">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                  </svg>
+                  <input type="file" accept=".svg,image/svg+xml" class="hidden" @change="onCustomIconFile" />
+                </label>
               </div>
+              <p class="text-xs mt-1.5" :class="customIconError.startsWith('Ícono cargado') ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'">
+                {{ customIconError || 'También puedes subir tu propio ícono en SVG (ideal: trazos simples, viewBox 24×24).' }}
+              </p>
             </div>
 
             <!-- Preview -->
