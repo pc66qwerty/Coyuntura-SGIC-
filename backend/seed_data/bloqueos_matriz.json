@@ -9,6 +9,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 100,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Paquetazo_rojo_protesta.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T06:00:00",
     "referencia_inicio": "Colonia la Bethania, Anillo Periferico, 27 calle, Zona 7 de Guatemala",
     "zona_inicio": "7",
@@ -456,6 +459,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 40,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Calzada_Roosevelt_-_Guatemala.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T12:25:00",
     "referencia_inicio": "Kilómetro 15 de la calzada Roosevelt zona 7 de Mixco, Como Referencia Gasolinera Puma",
     "zona_inicio": "7",
@@ -484,6 +490,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 200,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Aldea_Don_Justo%2C_Cruce_a_la_carretera_a_Pav%C3%B3n%2C_Fraijanes.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T12:00:00",
     "referencia_inicio": "Kilometro 21 ruta al Atlantico, Azacualpilla, Palencia, Guatemala.",
     "comisaria_inicio": "12",

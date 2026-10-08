@@ -301,12 +301,12 @@
         <!-- Fotos -->
         <div>
           <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--t3)">
-            Fotos <span style="color:var(--t3)">({{ existingFotos.length + newPreviews.length }}/{{ MAX_FOTOS }})</span>
+            Fotos <span style="color:var(--t3)">({{ existingFotos.length + newPreviews.length + newFotoUrls.length }}/{{ MAX_FOTOS }})</span>
           </label>
 
-          <div v-if="existingFotos.length || newPreviews.length" class="grid grid-cols-4 gap-2 mb-2">
+          <div v-if="existingFotos.length || newPreviews.length || newFotoUrls.length" class="grid grid-cols-4 gap-2 mb-2">
             <div v-for="src in existingFotos" :key="src" class="relative">
-              <img :src="src" class="w-full h-16 object-cover rounded-lg border" style="border-color:var(--border)" />
+              <img :src="resolveFotoSrc(src)" class="w-full h-16 object-cover rounded-lg border" style="border-color:var(--border)" />
               <button type="button" @click="markRemoveExisting(src)"
                 class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center border"
                 style="background:var(--surface);border-color:#FECACA;color:#DC2626">
@@ -321,19 +321,45 @@
                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
+            <div v-for="(src, i) in newFotoUrls" :key="src" class="relative">
+              <img :src="src" class="w-full h-16 object-cover rounded-lg border" style="border-color:var(--border)"
+                @error="$event.target.style.opacity='0.3'" />
+              <span class="absolute bottom-0.5 left-0.5 px-1 rounded text-[9px] font-bold text-white" style="background:rgba(0,0,0,.6)">URL</span>
+              <button type="button" @click="removeNewFotoUrl(i)"
+                class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center border"
+                style="background:var(--surface);border-color:var(--border);color:var(--t2)">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
           </div>
 
-          <label v-if="existingFotos.length + newPreviews.length < MAX_FOTOS"
-            class="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors border border-dashed"
-            style="background:var(--bg);border-color:var(--border);color:var(--t3)"
-            @mouseover="$event.currentTarget.style.borderColor='var(--accent)'"
-            @mouseleave="$event.currentTarget.style.borderColor='var(--border)'">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
-            </svg>
-            <span class="text-xs">Agregar fotos (máx. {{ MAX_FOTOS }})</span>
-            <input type="file" accept="image/*" multiple class="hidden" @change="onPhoto" />
-          </label>
+          <div v-if="existingFotos.length + newPreviews.length + newFotoUrls.length < MAX_FOTOS" class="space-y-2">
+            <label
+              class="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors border border-dashed"
+              style="background:var(--bg);border-color:var(--border);color:var(--t3)"
+              @mouseover="$event.currentTarget.style.borderColor='var(--accent)'"
+              @mouseleave="$event.currentTarget.style.borderColor='var(--border)'">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+              </svg>
+              <span class="text-xs">Agregar fotos (máx. {{ MAX_FOTOS }})</span>
+              <input type="file" accept="image/*" multiple class="hidden" @change="onPhoto" />
+            </label>
+            <div class="flex gap-1.5">
+              <input v-model="fotoUrlInput" type="url" placeholder="O pega el enlace de una foto (https://...)"
+                class="flex-1 px-3 py-2 rounded-lg text-xs outline-none transition-colors border"
+                style="background:var(--bg);border-color:var(--border);color:var(--t1)"
+                @keydown.enter.prevent="addFotoUrl"
+                @focus="$event.target.style.borderColor='var(--accent)'"
+                @blur="$event.target.style.borderColor='var(--border)'" />
+              <button type="button" @click="addFotoUrl"
+                class="px-3 py-2 rounded-lg text-xs font-medium border transition-colors"
+                style="background:var(--bg);border-color:var(--border);color:var(--t2)">
+                Agregar
+              </button>
+            </div>
+            <p v-if="fotoUrlError" class="text-xs" style="color:#DC2626">{{ fotoUrlError }}</p>
+          </div>
         </div>
 
         <div v-if="error" class="text-xs px-3 py-2 rounded-lg" style="background:#FEF2F2;border:1px solid #FECACA;color:#DC2626">{{ error }}</div>
@@ -391,12 +417,21 @@ const form = ref({
 const showDatosEvento = ref(false)
 const showFinalizacion = ref(false)
 const MAX_FOTOS = 8
-const existingFotos = ref((props.bloqueo.fotos && props.bloqueo.fotos.length ? props.bloqueo.fotos : (props.bloqueo.foto_path ? [props.bloqueo.foto_path] : [])).map((p) => apiBase + p))
+// existingFotos guarda las rutas/URLs tal cual las devuelve la API (sin transformar)
+const existingFotos = ref(props.bloqueo.fotos && props.bloqueo.fotos.length ? [...props.bloqueo.fotos] : (props.bloqueo.foto_path ? [props.bloqueo.foto_path] : []))
 const fotosARemover = ref([])
 const newFiles = ref([])
 const newPreviews = ref([])
+const newFotoUrls = ref([])
+const fotoUrlInput = ref('')
+const fotoUrlError = ref('')
 const loading = ref(false)
 const error = ref('')
+
+// Una URL absoluta (foto referenciada por enlace) se usa tal cual; una ruta local se prefija con apiBase
+function resolveFotoSrc(p) {
+  return /^https?:\/\//i.test(p) ? p : apiBase + p
+}
 
 const municipios = computed(() => getMunicipios(form.value.departamento))
 const municipiosFin = computed(() => getMunicipios(form.value.departamento_fin))
@@ -423,7 +458,7 @@ const duracionCalculada = computed(() => {
 
 function onPhoto(e) {
   const files = Array.from(e.target.files || [])
-  const espacio = MAX_FOTOS - existingFotos.value.length - newFiles.value.length
+  const espacio = MAX_FOTOS - existingFotos.value.length - newFiles.value.length - newFotoUrls.value.length
   files.slice(0, espacio).forEach((file) => {
     newFiles.value.push(file)
     newPreviews.value.push(URL.createObjectURL(file))
@@ -437,11 +472,34 @@ function removeNewPhoto(i) {
   newPreviews.value.splice(i, 1)
 }
 
-function markRemoveExisting(displaySrc) {
-  const idx = existingFotos.value.indexOf(displaySrc)
+function addFotoUrl() {
+  fotoUrlError.value = ''
+  const url = fotoUrlInput.value.trim()
+  if (!url) return
+  if (!/^https?:\/\//i.test(url)) {
+    fotoUrlError.value = 'El enlace debe empezar con http:// o https://'
+    return
+  }
+  if (existingFotos.value.length + newFiles.value.length + newFotoUrls.value.length >= MAX_FOTOS) {
+    fotoUrlError.value = `Máximo ${MAX_FOTOS} fotos por evento`
+    return
+  }
+  if (newFotoUrls.value.includes(url) || existingFotos.value.includes(url)) {
+    fotoUrlError.value = 'Ese enlace ya fue agregado'
+    return
+  }
+  newFotoUrls.value.push(url)
+  fotoUrlInput.value = ''
+}
+
+function removeNewFotoUrl(i) {
+  newFotoUrls.value.splice(i, 1)
+}
+
+function markRemoveExisting(rawPath) {
+  const idx = existingFotos.value.indexOf(rawPath)
   if (idx === -1) return
-  const originalPath = displaySrc.slice(apiBase.length)
-  fotosARemover.value.push(originalPath)
+  fotosARemover.value.push(rawPath)
   existingFotos.value.splice(idx, 1)
 }
 
@@ -474,6 +532,7 @@ async function submit() {
 
     fotosARemover.value.forEach((path) => fd.append('remove_fotos', path))
     newFiles.value.forEach((file) => fd.append('fotos', file))
+    newFotoUrls.value.forEach((url) => fd.append('foto_urls', url))
 
     const { data } = await api.patch(`/api/bloqueos/${props.bloqueo.id}`, fd)
     emit('updated', data)

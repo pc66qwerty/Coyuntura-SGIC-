@@ -219,10 +219,10 @@
     <!-- Fotos -->
     <div>
       <label class="block font-mono text-xs uppercase tracking-wide mb-1.5" style="color:var(--form-label,var(--t2))">
-        Fotos <span style="color:var(--t3)">({{ fotoPreviews.length }}/{{ MAX_FOTOS }})</span>
+        Fotos <span style="color:var(--t3)">({{ fotoPreviews.length + fotoUrls.length }}/{{ MAX_FOTOS }})</span>
       </label>
-      <div v-if="fotoPreviews.length" class="grid grid-cols-4 gap-2 mb-2">
-        <div v-for="(src, i) in fotoPreviews" :key="src" class="relative">
+      <div v-if="fotoPreviews.length || fotoUrls.length" class="grid grid-cols-4 gap-2 mb-2">
+        <div v-for="(src, i) in fotoPreviews" :key="'f' + src" class="relative">
           <img :src="src" class="w-full h-16 object-cover rounded-lg border" style="border-color:var(--border)" />
           <button type="button" @click="removePhoto(i)"
             class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center border"
@@ -230,18 +230,44 @@
             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
+        <div v-for="(src, i) in fotoUrls" :key="'u' + src" class="relative">
+          <img :src="src" class="w-full h-16 object-cover rounded-lg border" style="border-color:var(--border)"
+            @error="$event.target.style.opacity='0.3'" />
+          <span class="absolute bottom-0.5 left-0.5 px-1 rounded text-[9px] font-bold text-white" style="background:rgba(0,0,0,.6)">URL</span>
+          <button type="button" @click="removeFotoUrl(i)"
+            class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center border"
+            style="background:var(--surface);border-color:var(--border);color:var(--t2)">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
       </div>
-      <label v-if="fotoPreviews.length < MAX_FOTOS"
-        class="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors border border-dashed"
-        style="background:var(--bg);border-color:var(--border);color:var(--t3)"
-        @mouseover="$event.currentTarget.style.borderColor='var(--accent)'"
-        @mouseleave="$event.currentTarget.style.borderColor='var(--border)'">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
-        </svg>
-        <span class="text-xs">Agregar fotos (máx. {{ MAX_FOTOS }}, 5MB c/u)</span>
-        <input type="file" accept="image/*" multiple class="hidden" @change="onPhoto" />
-      </label>
+      <div v-if="fotoPreviews.length + fotoUrls.length < MAX_FOTOS" class="space-y-2">
+        <label
+          class="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors border border-dashed"
+          style="background:var(--bg);border-color:var(--border);color:var(--t3)"
+          @mouseover="$event.currentTarget.style.borderColor='var(--accent)'"
+          @mouseleave="$event.currentTarget.style.borderColor='var(--border)'">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+          </svg>
+          <span class="text-xs">Agregar fotos (máx. {{ MAX_FOTOS }}, 5MB c/u)</span>
+          <input type="file" accept="image/*" multiple class="hidden" @change="onPhoto" />
+        </label>
+        <div class="flex gap-1.5">
+          <input v-model="fotoUrlInput" type="url" placeholder="O pega el enlace de una foto (https://...)"
+            class="flex-1 px-3 py-2 rounded-lg text-xs outline-none transition-colors border"
+            style="background:var(--bg);border-color:var(--border);color:var(--t1)"
+            @keydown.enter.prevent="addFotoUrl"
+            @focus="$event.target.style.borderColor='var(--accent)'"
+            @blur="$event.target.style.borderColor='var(--border)'" />
+          <button type="button" @click="addFotoUrl"
+            class="px-3 py-2 rounded-lg text-xs font-medium border transition-colors"
+            style="background:var(--bg);border-color:var(--border);color:var(--t2)">
+            Agregar
+          </button>
+        </div>
+        <p v-if="fotoUrlError" class="text-xs" style="color:#DC2626">{{ fotoUrlError }}</p>
+      </div>
     </div>
 
     <div v-if="error" class="text-xs px-3 py-2 rounded-lg" style="background:#FEF2F2;border:1px solid #FECACA;color:#DC2626">{{ error }}</div>
@@ -310,6 +336,9 @@ const showDatosEvento = ref(false)
 const MAX_FOTOS = 8
 const fotoFiles = ref([])
 const fotoPreviews = ref([])
+const fotoUrls = ref([])
+const fotoUrlInput = ref('')
+const fotoUrlError = ref('')
 
 const municipios = computed(() => getMunicipios(form.value.departamento))
 
@@ -339,7 +368,7 @@ async function onMunicipioChange() {
 
 function onPhoto(e) {
   const files = Array.from(e.target.files || [])
-  const espacio = MAX_FOTOS - fotoFiles.value.length
+  const espacio = MAX_FOTOS - fotoFiles.value.length - fotoUrls.value.length
   files.slice(0, espacio).forEach((file) => {
     fotoFiles.value.push(file)
     fotoPreviews.value.push(URL.createObjectURL(file))
@@ -351,6 +380,30 @@ function removePhoto(i) {
   URL.revokeObjectURL(fotoPreviews.value[i])
   fotoFiles.value.splice(i, 1)
   fotoPreviews.value.splice(i, 1)
+}
+
+function addFotoUrl() {
+  fotoUrlError.value = ''
+  const url = fotoUrlInput.value.trim()
+  if (!url) return
+  if (!/^https?:\/\//i.test(url)) {
+    fotoUrlError.value = 'El enlace debe empezar con http:// o https://'
+    return
+  }
+  if (fotoFiles.value.length + fotoUrls.value.length >= MAX_FOTOS) {
+    fotoUrlError.value = `Máximo ${MAX_FOTOS} fotos por evento`
+    return
+  }
+  if (fotoUrls.value.includes(url)) {
+    fotoUrlError.value = 'Ese enlace ya fue agregado'
+    return
+  }
+  fotoUrls.value.push(url)
+  fotoUrlInput.value = ''
+}
+
+function removeFotoUrl(i) {
+  fotoUrls.value.splice(i, 1)
 }
 
 watch(() => props.pendingCoords, (coords) => {
@@ -388,6 +441,7 @@ async function submit() {
       if (form.value[key]) fd.append(key, form.value[key])
     })
     fotoFiles.value.forEach((file) => fd.append('fotos', file))
+    fotoUrls.value.forEach((url) => fd.append('foto_urls', url))
 
     const { data } = await api.post('/api/bloqueos', fd)
 
@@ -401,6 +455,7 @@ async function submit() {
     fotoPreviews.value.forEach((src) => URL.revokeObjectURL(src))
     fotoFiles.value = []
     fotoPreviews.value = []
+    fotoUrls.value = []
     emit('created', data)
   } catch (e) {
     error.value = e.response?.data?.detail || 'Error al registrar el evento'

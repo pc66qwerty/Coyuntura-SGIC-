@@ -239,10 +239,15 @@ def seed_database():
                     eventos_seed = json.load(f)
                 for ev in eventos_seed:
                     ev = dict(ev)
+                    fotos_urls = ev.pop("fotos", None) or []
                     for campo in ("fecha_hora_inicio", "fecha_hora_fin"):
                         if ev.get(campo):
                             ev[campo] = datetime.fromisoformat(ev[campo])
-                    db.add(Bloqueo(**ev))
+                    b = Bloqueo(**ev)
+                    db.add(b)
+                    db.flush()
+                    for orden, url in enumerate(fotos_urls):
+                        db.add(BloqueoFoto(bloqueo_id=b.id, path=url, orden=orden))
                 db.commit()
 
         # Migrar fotos antiguas (columna foto_path) a la tabla bloqueo_fotos
@@ -673,6 +678,29 @@ def _guardar_fotos(db: Session, bloqueo_id: int, fotos: List[UploadFile], orden_
             shutil.copyfileobj(foto.file, f)
         db.add(BloqueoFoto(bloqueo_id=bloqueo_id, path=f"/storage/{filename}", orden=orden))
         orden += 1
+    return orden
+
+
+def _validar_foto_urls(urls: List[str]) -> List[str]:
+    """Normaliza y valida enlaces de foto. Se llama ANTES de crear/modificar el evento,
+    para no dejar un registro huérfano si un enlace es inválido."""
+    limpias = []
+    for url in urls:
+        url = (url or "").strip()
+        if not url:
+            continue
+        if not (url.startswith("http://") or url.startswith("https://")):
+            raise HTTPException(status_code=422, detail=f"Enlace de foto inválido: {url}")
+        limpias.append(url)
+    return limpias
+
+
+def _guardar_foto_urls(db: Session, bloqueo_id: int, urls: List[str], orden_inicial: int = 0):
+    orden = orden_inicial
+    for url in urls:
+        db.add(BloqueoFoto(bloqueo_id=bloqueo_id, path=url, orden=orden))
+        orden += 1
+    return orden
 
 
 @app.get("/api/bloqueos")
@@ -701,6 +729,7 @@ def create_bloqueo(
     manifestantes_aproximados: Optional[int] = Form(None),
     observaciones: Optional[str] = Form(None),
     fotos: List[UploadFile] = File(default=[]),
+    foto_urls: List[str] = Form(default=[]),
     # Inicio (matriz institucional)
     fecha_hora_inicio: Optional[datetime] = Form(None),
     referencia_inicio: Optional[str] = Form(None),
@@ -716,7 +745,8 @@ def create_bloqueo(
     _: User = Depends(require_editor),
     db: Session = Depends(get_db),
 ):
-    if len(fotos) > MAX_FOTOS_POR_BLOQUEO:
+    foto_urls = _validar_foto_urls(foto_urls)
+    if len(fotos) + len(foto_urls) > MAX_FOTOS_POR_BLOQUEO:
         raise HTTPException(status_code=422, detail=f"Máximo {MAX_FOTOS_POR_BLOQUEO} fotos por evento")
 
     valores_analisis = {
@@ -752,7 +782,8 @@ def create_bloqueo(
     db.commit()
     db.refresh(b)
 
-    _guardar_fotos(db, b.id, fotos)
+    siguiente_orden = _guardar_fotos(db, b.id, fotos)
+    _guardar_foto_urls(db, b.id, foto_urls, orden_inicial=siguiente_orden)
     db.commit()
     db.refresh(b)
     return bloqueo_to_dict(b, db)
@@ -771,6 +802,7 @@ def update_bloqueo(
     manifestantes_aproximados: Optional[int] = Form(None),
     observaciones: Optional[str] = Form(None),
     fotos: List[UploadFile] = File(default=[]),
+    foto_urls: List[str] = Form(default=[]),
     remove_fotos: List[str] = Form(default=[]),
     # Inicio
     fecha_hora_inicio: Optional[datetime] = Form(None),
@@ -801,6 +833,8 @@ def update_bloqueo(
     b = db.query(Bloqueo).filter(Bloqueo.id == bloqueo_id).first()
     if not b:
         raise HTTPException(status_code=404, detail="Evento no encontrado")
+
+    foto_urls = _validar_foto_urls(foto_urls)
 
     if direccion is not None:
         b.direccion = direccion
@@ -876,19 +910,21 @@ def update_bloqueo(
             .all()
         )
         for foto in a_eliminar:
-            filepath = os.path.join(STORAGE_PATH, os.path.basename(foto.path))
-            if os.path.exists(filepath):
-                os.remove(filepath)
+            if foto.path.startswith("/storage/"):
+                filepath = os.path.join(STORAGE_PATH, os.path.basename(foto.path))
+                if os.path.exists(filepath):
+                    os.remove(filepath)
             db.delete(foto)
 
-    if fotos:
+    if fotos or foto_urls:
         restantes = db.query(BloqueoFoto).filter(BloqueoFoto.bloqueo_id == b.id).count()
         if remove_fotos:
             restantes -= len(remove_fotos)
-        if restantes + len(fotos) > MAX_FOTOS_POR_BLOQUEO:
+        if restantes + len(fotos) + len(foto_urls) > MAX_FOTOS_POR_BLOQUEO:
             raise HTTPException(status_code=422, detail=f"Máximo {MAX_FOTOS_POR_BLOQUEO} fotos por evento")
         siguiente_orden = db.query(BloqueoFoto).filter(BloqueoFoto.bloqueo_id == b.id).count() + 1000
-        _guardar_fotos(db, b.id, fotos, orden_inicial=siguiente_orden)
+        siguiente_orden = _guardar_fotos(db, b.id, fotos, orden_inicial=siguiente_orden)
+        _guardar_foto_urls(db, b.id, foto_urls, orden_inicial=siguiente_orden)
 
     b.updated_at = datetime.now()
     db.commit()
