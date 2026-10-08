@@ -42,6 +42,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 100,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-02.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T06:00:00",
     "referencia_inicio": "Kilometro 168 Ruta CA-2 Cuyotenango, Suchitepequez",
     "comisaria_inicio": "33",
@@ -70,6 +73,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 150,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-03.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T06:00:00",
     "referencia_inicio": "KM 7.5 Ruta al Atlantico, zona 18  frente a plaza San Rafael, Guatemala, Guatemala",
     "comisaria_inicio": "12",
@@ -99,6 +105,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 150,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-04.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T04:50:00",
     "referencia_inicio": "Kilometro 136, Ruta al Atlantico, Rio Hondo, Zacapa.",
     "comisaria_inicio": "22",
@@ -127,6 +136,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 30,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-05.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T06:41:00",
     "referencia_inicio": "Frente al Aeropuerto Mundo Maya",
     "comisaria_inicio": "62",
@@ -154,6 +166,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 30,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-06.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T06:00:00",
     "referencia_inicio": "Kilometro 169 Ruta CA-2, Entrada a San Andres Villa Seca",
     "comisaria_inicio": "33",
@@ -182,6 +197,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 50,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-07.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T04:50:00",
     "referencia_inicio": "Entrada a la Aldea la Arenera",
     "comisaria_inicio": "22",
@@ -209,6 +227,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 20,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-08.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T07:00:00",
     "referencia_inicio": "Kilometro 180.5 Cruce a San Julian",
     "comisaria_inicio": "51",
@@ -237,6 +258,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 10,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-09.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T06:30:00",
     "referencia_inicio": "Kilometro 18 Ruta Al Centro, Frente a Gasolinera Texaco",
     "comisaria_inicio": "12",
@@ -265,6 +289,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 10,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-10.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T06:30:00",
     "referencia_inicio": "Kilometro 13 Ruta Al Atlantico, Zona 17 de Guatemala",
     "comisaria_inicio": "12",
@@ -293,6 +320,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 20,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-11.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T06:30:00",
     "referencia_inicio": "Kilometro 12.7 Ruta al Atlantico, Direccion hacia el centro.",
     "comisaria_inicio": "12",
@@ -320,6 +350,9 @@
     "longitud": -90.11666939,
     "estado": "Inactivo",
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-12.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T07:20:00",
     "referencia_inicio": "Kilometro 445 Entrada la Libertad Peten",
     "comisaria_inicio": "62",
@@ -346,6 +379,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 150,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-13.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T07:00:00",
     "referencia_inicio": "kilometro 66.5 Ruta CA-1 Los Esclavos Cuilapa, Santa Rosa",
     "comisaria_inicio": "32",
@@ -374,6 +410,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 50,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-14.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T07:30:00",
     "referencia_inicio": "Km 483 Frente a casa de Dios, Ruta a San Francisco, San Benito, Peten",
     "comisaria_inicio": "61",
@@ -403,6 +442,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 50,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-15.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T11:15:00",
     "referencia_inicio": "Km. 15 Loma Real, Prados de Villa Hermosa, San Miguel Petapa, Guatemala",
     "comisaria_inicio": "15",
@@ -430,6 +472,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 20,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-16.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T11:10:00",
     "referencia_inicio": "Km- 428, Zona 0 Caserio San Juan a Aldea Agricultores, El Chal, Peten",
     "zona_inicio": "0",
@@ -520,6 +565,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 50,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-18.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T15:45:00",
     "referencia_inicio": "Avenida Petapa y 45 Calle zona 12 de Guatemala",
     "comisaria_inicio": "14",
@@ -546,6 +594,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 50,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-19.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T11:25:00",
     "referencia_inicio": "Ingreso Calle Corona, Ciudad Real, Avenida Petapa,  zona 12 de Guatemala",
     "comisaria_inicio": "14",
@@ -573,6 +624,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 100,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-20.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T14:55:00",
     "referencia_inicio": "Tres  Caminos, Aldea Amberez, Santa Rosa de Lima, Santa Rosa",
     "comisaria_inicio": "32",
@@ -599,6 +653,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 10,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-21.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T14:44:00",
     "referencia_inicio": "14 calle 14-23 zona 7 Belén Mixco, Guatemala",
     "comisaria_inicio": "16",
@@ -625,6 +682,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 200,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-22.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T14:45:00",
     "referencia_inicio": "Boulevard los Olivos, Redondel Colonia El Limon, Zona 18 de Guatemala",
     "comisaria_inicio": "12",
@@ -652,6 +712,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 50,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-23.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T14:51:00",
     "referencia_inicio": "Km 126 Ruta CA-2, Zona 0, Rio Bravo, Suchitepequez",
     "zona_inicio": "0",
@@ -679,6 +742,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 40,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-24.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T15:20:00",
     "referencia_inicio": "Kilometro 19 Ruta al Pacifico, Villa Nueva Guatemala",
     "zona_inicio": "0",
@@ -706,6 +772,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 50,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-25.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T15:45:00",
     "referencia_inicio": "33 calle C, Zona 6 lo de Bran Mixco, Guatemala",
     "zona_inicio": "6",
@@ -734,6 +803,9 @@
     "estado": "Activo",
     "manifestantes_aproximados": 20,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-26.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T16:20:00",
     "referencia_inicio": "Ruta Principal hacia Río Dulce El Estor, Izabal",
     "comisaria_inicio": "61",
@@ -753,6 +825,9 @@
     "estado": "Activo",
     "manifestantes_aproximados": 300,
     "observaciones": "NINGUNA",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-27.jpg"
+    ],
     "fecha_hora_inicio": "2026-09-11T21:55:00",
     "referencia_inicio": "Kilometro 192 CA-11 Caserio Las Crucitas, Jocotan, Chiquimula",
     "comisaria_inicio": "23",
@@ -772,6 +847,9 @@
     "longitud": -90.819,
     "estado": "Activo",
     "observaciones": "Colision entre pickup y microbus, carril derecho obstruido",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Car_Accident.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T07:40:00",
     "referencia_inicio": "Km 54 CA-1 Occidente, entrada a Chimaltenango",
     "zona_inicio": "Por establecer",
@@ -794,6 +872,9 @@
     "estado": "Activo",
     "manifestantes_aproximados": 60,
     "observaciones": "Bloqueo total de doble via",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-28.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T08:15:00",
     "referencia_inicio": "Km 90 CA-9 Sur, frente a terminal de buses",
     "zona_inicio": "Por establecer",
@@ -815,6 +896,9 @@
     "longitud": -91.519,
     "estado": "Inactivo",
     "observaciones": "Trabajos de bacheo, un carril habilitado",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Pothole_repair.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T06:00:00",
     "referencia_inicio": "Km 200 CA-1 Occidente, zona 3",
     "zona_inicio": "Por establecer",
@@ -843,6 +927,9 @@
     "estado": "Activo",
     "manifestantes_aproximados": 45,
     "observaciones": "Paso parcial habilitado por un carril",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-29.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T09:10:00",
     "referencia_inicio": "Km 252 CA-1 Occidente",
     "zona_inicio": "Por establecer",
@@ -864,6 +951,9 @@
     "longitud": -91.519,
     "estado": "Inactivo",
     "observaciones": "Vehiculo liviano volcado, sin heridos de gravedad",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Car_crash_1.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T05:50:00",
     "referencia_inicio": "Km 266 CA-1 Occidente",
     "zona_inicio": "Por establecer",
@@ -891,6 +981,9 @@
     "longitud": -91.158,
     "estado": "Activo",
     "observaciones": "Vehiculo averiado obstruye carril, se brinda apoyo",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Autonational_rescue_breakdown01.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T10:20:00",
     "referencia_inicio": "Km 148 RN-1, entrada a Panajachel",
     "zona_inicio": "Por establecer",
@@ -913,6 +1006,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 80,
     "observaciones": "Bloqueo levantado tras dialogo con autoridades locales",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-30.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T06:30:00",
     "referencia_inicio": "Km 198 CA-1, entrada a Totonicapan",
     "zona_inicio": "Por establecer",
@@ -940,6 +1036,9 @@
     "longitud": -91.149,
     "estado": "Activo",
     "observaciones": "Paso regulado por bandereros, demora aproximada 20 min",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Falcon_asphalt_recycler_for_pothole_repair.JPG"
+    ],
     "fecha_hora_inicio": "2026-10-07T07:00:00",
     "referencia_inicio": "Km 163 RN-15",
     "zona_inicio": "Por establecer",
@@ -961,6 +1060,9 @@
     "longitud": -89.896,
     "estado": "Inactivo",
     "observaciones": "Colision leve, via despejada",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Car_crash.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T13:10:00",
     "referencia_inicio": "Km 120 CA-1 Oriente",
     "zona_inicio": "Por establecer",
@@ -989,6 +1091,9 @@
     "estado": "Activo",
     "manifestantes_aproximados": 120,
     "observaciones": "Bloqueo total, desvio habilitado por ruta alterna",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renuncia_Ya-31.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T08:45:00",
     "referencia_inicio": "Km 100 RN-19, entrada a Jalapa",
     "zona_inicio": "Por establecer",
@@ -1010,6 +1115,9 @@
     "longitud": -89.871,
     "estado": "Activo",
     "observaciones": "Derrumbe parcial obstruye un carril tras lluvias",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Derrumbe_en_la_Carretera_hacia_La_Fortuna_en_Chiriqu%C3%AD%2C_Panam%C3%A1_%281997%29.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T04:30:00",
     "referencia_inicio": "Km 76 CA-9 Norte",
     "zona_inicio": "Por establecer",
@@ -1032,6 +1140,9 @@
     "estado": "Inactivo",
     "manifestantes_aproximados": 35,
     "observaciones": "Bloqueo disuelto de forma pacifica",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Barricada_Caracas_2017.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T06:15:00",
     "referencia_inicio": "Km 150 CA-14",
     "zona_inicio": "Por establecer",
@@ -1059,6 +1170,9 @@
     "longitud": -91.68,
     "estado": "Activo",
     "observaciones": "Tracto camion volcado derrama carga, un carril cerrado",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Car-truck_accident.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T11:50:00",
     "referencia_inicio": "Km 180 CA-2 Occidente",
     "zona_inicio": "Por establecer",
@@ -1080,6 +1194,9 @@
     "longitud": -90.733,
     "estado": "Inactivo",
     "observaciones": "Apoyo brindado, vehiculo remolcado",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Renault_Mascott_Tow_truck_Renault_Assistance_%2846197499395%29.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T16:00:00",
     "referencia_inicio": "Km 32 RN-10, entrada a Antigua Guatemala",
     "zona_inicio": "Por establecer",
@@ -1107,6 +1224,9 @@
     "longitud": -91.86,
     "estado": "Inactivo",
     "observaciones": "Ruta despejada tras bloqueo registrado horas antes",
+    "fotos": [
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Empty_highway_%28Unsplash%29.jpg"
+    ],
     "fecha_hora_inicio": "2026-10-07T05:00:00",
     "referencia_inicio": "Km 224 CA-2, entrada a Coatepeque",
     "zona_inicio": "Por establecer",
