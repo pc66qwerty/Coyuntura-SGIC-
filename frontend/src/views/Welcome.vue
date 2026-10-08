@@ -340,6 +340,10 @@ const recenterMap = () => {
   deselectBloqueo()
   map.flyTo(center, zoom, { animate: true, duration: 1 })
 }
+
+const scrollToStats = () => {
+  document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 </script>
 
 <template>
@@ -452,6 +456,15 @@ const recenterMap = () => {
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 8a4 4 0 100 8 4 4 0 000-8z"/>
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+        </svg>
+      </button>
+
+      <!-- Indicador para deslizar hacia las estadísticas -->
+      <button @click="scrollToStats" title="Ver estadísticas"
+        class="absolute bottom-6 sm:bottom-40 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center gap-0.5 px-4 py-2 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur border border-gray-200 dark:border-gray-700 shadow-lg text-gray-600 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-900 transition animate-bounce">
+        <span class="text-[10px] font-bold uppercase tracking-wider">Ver estadísticas</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
 
@@ -641,7 +654,7 @@ const recenterMap = () => {
     <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
 
       <!-- ── Estadísticas ────────────────────────────────────── -->
-      <section>
+      <section id="stats-section">
         <div class="flex items-center gap-3 mb-6">
           <div class="w-1 h-6 bg-red-500 rounded-full"></div>
           <h2 class="text-xl font-extrabold text-gray-900 dark:text-white">Estadísticas</h2>
