@@ -31,6 +31,7 @@ const listSearch = ref('')
 const listEstado = ref('Todos')
 const listTipo = ref('Todos')
 const listDepto = ref('Todos')
+const listPeriodo = ref('todo') // 'hoy' | 'ayer' | 'semana' | 'mes' | 'todo' | 'custom'
 const dateFrom = ref('')
 const dateTo = ref('')
 const printLoading = ref(false)
@@ -69,7 +70,10 @@ const tiempoActualizado = computed(() => {
   return `hace ${Math.floor(s / 60)}m`
 })
 
+const startOfDay = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x }
+
 const filteredList = computed(() => {
+  const hoy = startOfDay(new Date())
   let list = [...bloqueos.value]
   if (listSearch.value) {
     const q = listSearch.value.toLowerCase()
@@ -78,8 +82,23 @@ const filteredList = computed(() => {
   if (listEstado.value !== 'Todos') list = list.filter((b) => b.estado === listEstado.value)
   if (listTipo.value !== 'Todos') list = list.filter((b) => b.tipo_evento === listTipo.value)
   if (listDepto.value !== 'Todos') list = list.filter((b) => b.departamento === listDepto.value)
-  if (dateFrom.value) list = list.filter((b) => new Date(b.created_at) >= new Date(dateFrom.value))
-  if (dateTo.value) list = list.filter((b) => new Date(b.created_at) <= new Date(`${dateTo.value}T23:59:59`))
+  if (listPeriodo.value !== 'todo') {
+    list = list.filter((b) => {
+      if (!b.created_at) return false
+      const fecha = startOfDay(b.created_at)
+      const diffDias = Math.round((hoy - fecha) / 86400000)
+      if (listPeriodo.value === 'hoy') return diffDias === 0
+      if (listPeriodo.value === 'ayer') return diffDias === 1
+      if (listPeriodo.value === 'semana') return diffDias <= 6
+      if (listPeriodo.value === 'mes') return diffDias <= 29
+      if (listPeriodo.value === 'custom') {
+        if (dateFrom.value && fecha < startOfDay(dateFrom.value)) return false
+        if (dateTo.value && fecha > startOfDay(dateTo.value)) return false
+        return true
+      }
+      return true
+    })
+  }
   return list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 })
 
@@ -87,6 +106,21 @@ const deptosDisponibles = computed(() => {
   const set = new Set(bloqueos.value.map((b) => b.departamento).filter(Boolean))
   return ['Todos', ...Array.from(set).sort()]
 })
+
+const hayFiltrosActivos = computed(() =>
+  !!listSearch.value || listEstado.value !== 'Todos' || listTipo.value !== 'Todos' ||
+  listDepto.value !== 'Todos' || listPeriodo.value !== 'todo'
+)
+
+function limpiarFiltrosLista() {
+  listSearch.value = ''
+  listEstado.value = 'Todos'
+  listTipo.value = 'Todos'
+  listDepto.value = 'Todos'
+  listPeriodo.value = 'todo'
+  dateFrom.value = ''
+  dateTo.value = ''
+}
 
 const totalPages = computed(() => Math.max(1, Math.ceil(filteredList.value.length / PAGE_SIZE)))
 const pagedList = computed(() => {
@@ -96,7 +130,7 @@ const pagedList = computed(() => {
 function goToPage(p) {
   currentPage.value = Math.max(1, Math.min(p, totalPages.value))
 }
-watch([listSearch, listEstado, listTipo, listDepto, dateFrom, dateTo], () => { currentPage.value = 1 })
+watch([listSearch, listEstado, listTipo, listDepto, listPeriodo, dateFrom, dateTo], () => { currentPage.value = 1 })
 
 function showToast(msg, type = 'success') {
   const id = ++toastId
@@ -363,12 +397,14 @@ async function exportExcel() {
     // Fila 2: subtítulo con fecha de generación e instituciones
     ws.mergeCells(2, 1, 2, totalCols)
     const exportList = filteredList.value
+    const PERIODO_LABEL = { hoy: 'Hoy', ayer: 'Ayer', semana: 'Últ. 7 días', mes: 'Últ. 30 días', custom: 'Personalizado' }
     const filtrosActivos = [
       listEstado.value !== 'Todos' ? `Estado: ${listEstado.value}` : '',
       listTipo.value !== 'Todos' ? `Tipo: ${listTipo.value}` : '',
       listDepto.value !== 'Todos' ? `Departamento: ${listDepto.value}` : '',
-      dateFrom.value ? `Desde: ${dateFrom.value}` : '',
-      dateTo.value ? `Hasta: ${dateTo.value}` : '',
+      listPeriodo.value !== 'todo' ? `Período: ${PERIODO_LABEL[listPeriodo.value]}` : '',
+      listPeriodo.value === 'custom' && dateFrom.value ? `Desde: ${dateFrom.value}` : '',
+      listPeriodo.value === 'custom' && dateTo.value ? `Hasta: ${dateTo.value}` : '',
       listSearch.value ? `Búsqueda: "${listSearch.value}"` : '',
     ].filter(Boolean)
     const sufijoFiltros = filtrosActivos.length ? `   —   Filtros: ${filtrosActivos.join(' · ')}` : ''
@@ -898,52 +934,112 @@ onUnmounted(() => { if (pollInterval) clearInterval(pollInterval) })
                 ({{ filteredList.length }}{{ filteredList.length !== bloqueos.length ? ` de ${bloqueos.length}` : '' }})
               </span>
             </h3>
-            <div class="flex gap-2">
-              <div class="relative flex-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <input v-model="listSearch" type="text" placeholder="Buscar evento, lugar..."
-                  class="w-full bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl pl-8 pr-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-indigo-400 transition shadow-sm"/>
+
+            <div class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-2xl p-3 shadow-sm space-y-3">
+
+              <!-- Fila 1: búsqueda + limpiar -->
+              <div class="flex gap-2 items-center">
+                <div class="relative flex-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                  <input v-model="listSearch" type="text" placeholder="Buscar evento, lugar..."
+                    class="w-full bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl pl-8 pr-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-indigo-400 transition shadow-sm"/>
+                </div>
+                <transition enter-active-class="transition duration-150" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100">
+                  <button v-if="hayFiltrosActivos" @click="limpiarFiltrosLista"
+                    class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 hover:bg-red-100 dark:hover:bg-red-900/40 transition whitespace-nowrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Limpiar
+                  </button>
+                </transition>
               </div>
-              <div class="flex rounded-xl border border-[#E2E8F0] dark:border-[#2A2A2A] overflow-hidden text-xs font-semibold shadow-sm">
-                <button v-for="opt in ['Todos', 'Activo', 'Inactivo']" :key="opt"
-                  @click="listEstado = opt"
-                  class="px-2.5 py-1.5 transition"
-                  :class="listEstado === opt
-                    ? 'bg-[#E8EDF5] dark:bg-[#2A2A2A] text-gray-800 dark:text-white'
-                    : 'bg-white dark:bg-[#1C1C1E] text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'">
-                  {{ opt }}
+
+              <!-- Fila 2: período rápido -->
+              <div class="flex flex-wrap gap-1.5 items-center">
+                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 mr-1">Período:</span>
+                <button v-for="p in [
+                  { key:'hoy',    label:'Hoy' },
+                  { key:'ayer',   label:'Ayer' },
+                  { key:'semana', label:'Últ. 7 días' },
+                  { key:'mes',    label:'Últ. 30 días' },
+                  { key:'todo',   label:'Todo' },
+                  { key:'custom', label:'Personalizado' },
+                ]" :key="p.key" @click="listPeriodo = p.key"
+                  class="px-2.5 py-1 rounded-full text-xs font-semibold border transition"
+                  :class="listPeriodo === p.key
+                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm'
+                    : 'bg-white dark:bg-[#1C1C1E] border-[#E2E8F0] dark:border-[#2A2A2A] text-gray-500 dark:text-gray-400 hover:border-indigo-400 hover:text-indigo-500'">
+                  {{ p.label }}
                 </button>
               </div>
-            </div>
-            <!-- Filtro de tipo / departamento -->
-            <div class="flex items-center gap-2 flex-wrap">
-              <select v-model="listTipo"
-                class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg px-2 py-1.5 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-indigo-400 transition shadow-sm cursor-pointer">
-                <option value="Todos">Todos los tipos</option>
-                <option v-for="t in tipos" :key="t.nombre" :value="t.nombre">{{ t.nombre }}</option>
-              </select>
-              <select v-model="listDepto"
-                class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg px-2 py-1.5 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-indigo-400 transition shadow-sm cursor-pointer">
-                <option v-for="d in deptosDisponibles" :key="d" :value="d">
-                  {{ d === 'Todos' ? 'Todos los dptos.' : d }}
-                </option>
-              </select>
-              <button v-if="listTipo !== 'Todos' || listDepto !== 'Todos'" @click="listTipo = 'Todos'; listDepto = 'Todos'"
-                class="text-xs text-gray-400 hover:text-red-500 transition px-1">✕ Limpiar</button>
-            </div>
-            <!-- Filtro de fechas -->
-            <div class="flex items-center gap-2 flex-wrap">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              <input v-model="dateFrom" type="date"
-                class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg px-2 py-1 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-indigo-400 transition shadow-sm cursor-pointer"/>
-              <span class="text-xs text-gray-400 dark:text-gray-500">—</span>
-              <input v-model="dateTo" type="date"
-                class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg px-2 py-1 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-indigo-400 transition shadow-sm cursor-pointer"/>
-              <button v-if="dateFrom || dateTo" @click="dateFrom = ''; dateTo = ''" class="text-xs text-gray-400 hover:text-red-500 transition px-1">✕ Limpiar</button>
+
+              <!-- Fila 2b: rango personalizado -->
+              <transition enter-active-class="transition duration-200" enter-from-class="opacity-0 -translate-y-1" enter-to-class="opacity-100 translate-y-0">
+                <div v-if="listPeriodo === 'custom'" class="flex flex-wrap gap-2 items-center pl-1">
+                  <label class="text-xs text-gray-400 dark:text-gray-500 font-semibold">Desde</label>
+                  <input type="date" v-model="dateFrom"
+                    class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg px-2 py-1 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-indigo-400 transition shadow-sm cursor-pointer"/>
+                  <label class="text-xs text-gray-400 dark:text-gray-500 font-semibold">Hasta</label>
+                  <input type="date" v-model="dateTo"
+                    class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg px-2 py-1 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-indigo-400 transition shadow-sm cursor-pointer"/>
+                </div>
+              </transition>
+
+              <!-- Fila 3: estado, tipo, departamento, exportar -->
+              <div class="flex flex-wrap gap-2 items-center border-t border-[#E2E8F0] dark:border-[#2A2A2A] pt-3">
+                <div class="flex rounded-xl border border-[#E2E8F0] dark:border-[#2A2A2A] overflow-hidden text-xs font-semibold shadow-sm">
+                  <button v-for="opt in ['Todos', 'Activo', 'Inactivo']" :key="opt"
+                    @click="listEstado = opt"
+                    class="px-2.5 py-1.5 transition"
+                    :class="listEstado === opt
+                      ? 'bg-[#E8EDF5] dark:bg-[#2A2A2A] text-gray-800 dark:text-white'
+                      : 'bg-white dark:bg-[#1C1C1E] text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'">
+                    {{ opt }}
+                  </button>
+                </div>
+                <select v-model="listTipo"
+                  class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg px-2 py-1.5 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-indigo-400 transition shadow-sm cursor-pointer">
+                  <option value="Todos">Todos los tipos</option>
+                  <option v-for="t in tipos" :key="t.nombre" :value="t.nombre">{{ t.nombre }}</option>
+                </select>
+                <select v-model="listDepto"
+                  class="bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg px-2 py-1.5 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:border-indigo-400 transition shadow-sm cursor-pointer">
+                  <option v-for="d in deptosDisponibles" :key="d" :value="d">
+                    {{ d === 'Todos' ? 'Todos los dptos.' : d }}
+                  </option>
+                </select>
+
+                <!-- Exportar -->
+                <div class="ml-auto flex items-center gap-1.5">
+                  <button @click="exportExcel" :disabled="excelLoading"
+                    :title="filteredList.length !== bloqueos.length ? `Exporta los ${filteredList.length} eventos filtrados (de ${bloqueos.length} en total)` : `Exporta los ${bloqueos.length} eventos`"
+                    class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] text-gray-600 dark:text-gray-300 rounded-lg hover:border-green-500 hover:text-green-600 dark:hover:text-green-400 shadow-sm transition disabled:opacity-50">
+                    <svg v-if="!excelLoading" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    <svg v-else class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                    </svg>
+                    Excel
+                  </button>
+                  <button @click="printReport" :disabled="printLoading"
+                    :title="filteredList.length !== bloqueos.length ? `Genera un PDF con los ${filteredList.length} eventos filtrados (de ${bloqueos.length} en total)` : `Genera un PDF con los ${bloqueos.length} eventos`"
+                    class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold bg-white dark:bg-[#1C1C1E] border border-[#E2E8F0] dark:border-[#2A2A2A] text-gray-600 dark:text-gray-300 rounded-lg hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 shadow-sm transition disabled:opacity-50">
+                    <svg v-if="!printLoading" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    <svg v-else class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                    </svg>
+                    PDF
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
